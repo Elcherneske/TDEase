@@ -1,0 +1,121 @@
+{
+    "mainTitle": "Report Interface",
+    "selectFolder": "📁 Select Report Folder",
+    "report_tab_label": "Summary",
+    "feature_tab_label": "Feature Map",
+    "toppic_tab_label": "Ms2 Results",
+    "guide_tab_label": "User Guide",
+
+
+    "ms1_featuremap_header": "**MS1 Featuremap**",  
+    "featuremap_caption": ":material/star: **FeatureMap:** Displays the time and mass distribution of features,Please select a range on the graph for the next step",  
+    "integration_caption": ":material/star: **Integration:** Displays the integrated spectrum within the selected area",
+    "ptms_caption": ":material/star: **PTMs Matching:** Displays the PTMs matching results within the selected time range",  
+    "heatmap_xaxis_title": "Retention Time (min)",
+    "heatmap_yaxis_title": "Mass (Da)",
+    "heatmap_title": "Feature Heatmap",
+    "spectrum_xaxis_title": "Mass (Da)",
+    "spectrum_yaxis_title": "Intensity (%)",
+    "spectrum_title": "Integrated Spectrum",
+    "export_spectrum_button_label": "💾 Export Interactive Integrated Spectrum",
+    "export_featuremap_button_label": "💾 Export Interactive Feature Map", 
+
+
+    "sample_detected_prefix": "__Totally detected in this sample:__",
+    "proteins": "Proteins",
+    "proteoforms": "Proteoforms",
+    "prsms": "Features",
+    "units": "items",
+    "folder_not_found_prefix": "⚠️",
+    "folder_not_found_suffix": " directory not found",
+
+
+    "feature_file_not_found": "❌ Feature file not found",
+    "feature_load_failed": "⛔ Failed to load feature data: {0}",
+    "prsm_file_not_found": "❌ PrSM data file not found",
+    "prsm_file_empty": "File {0} is empty",
+    "prsm_load_failed": "Failed to load {0}: {1}",
+    "missing_required_columns": "❌ Missing required columns: {0}",
+    "integration_no_data_warning": "No valid data in the integration interval, please adjust the range settings",
+
+
+    "custom_ptms_expander": "**Custom PTMs Matching Library**",
+    "add_ptms_button": "➕ Add PTMs Rule",
+    "del_ptms_button": "➖ Delete Selected Item",
+    "mass_diff_label": "Mass Difference (Da)", 
+    "ptms_type_label": "PTM Type", 
+    "ppm_threshold_label": "Matching Accuracy Threshold (ppm)", 
+    "ppm_threshold_help": "If the accuracy exceeds this threshold, it is considered to exceed the mass spectrometry accuracy tolerance range, and there is no matching modification.", 
+
+    "fullscreen_tip": "Tip: Click the top-right button of the table to enter fullscreen mode",  
+    "exbasy_text": "📃 You can use the ExBasy tool to calculate the approximate mass of your target protein.",
+    "exbasy_button_label": "ExBasy: Calculate Protein Accurate Mass",
+    "exbasy_tip": "❗ For high-resolution mass spectrometry, you need to click the 'Monoisotopic' option to calculate.",
+    "no_valid_data_warning": "No valid data within the selected range.",
+    "no_near_peaks_warning": "No neighboring peaks found within the specified range.",
+
+    "select_feature_file": "Select Feature File",
+    "current_file": "**Current File**",
+    "download_button": "📥 Download Selected File",
+    "heatmap_settings_expander": "**Heatmap Basic Settings**",  
+    "intensity_process": "Intensity Process Method", 
+    "x_pixel_label": "x-axis Pixel",  
+    "y_pixel_label": "y-axis Pixel",  
+    "data_limit_label": "Display Data Points Limit",
+    "data_limit_help": "Sort by intensity from high to low, display the top n strongest points to clarify the image",  
+
+    "advanced_color_settings_expander": "**Advanced Color Settings**",  
+    "custom_color_checkbox": "Enable Custom Color", 
+    "custom_color_help": "If enabled, it will override the default color configuration",
+    "color_nodes_text": "**Color Node Configuration**",  
+    "add_node_button": "➕ Add Node", 
+    "remove_node_button": "➖ Remove Node",  
+    "color_picker_label": "Node {i+1} Color", 
+    "position_input_label": "Node {i+1} Position",
+
+    "detailed_file_view": "**Detailed File View**",
+    "open_toppic_report": "📑 Open Toppic Report",
+    "table_row_count":"✈ **Table Count：** `{row_count:,}` Items",
+    "download_file":"📥 Download{filename}",
+    "selec_feature_file": "Select Feature File",
+    
+    "compare_mode_checkbox": "Compare Mode",
+    "select_sample": "Select A Sample",
+    "compare_settings_expander": "**Compare Settings**",
+    "sample1_color_picker": "Primary sample color",
+    "sample2_color_picker": "Compare sample color",
+    "integration_manual_settings_expander": "**Manual Integration Settings**",
+    "integration_manual_checkbox": "Click To Set Integration Range Mannually",
+    "integration_manual_help": "If you are unsatisfied with the automatic integration range, you can set the integration range mannually.",
+
+    "mass_range_text": "Mass Range (Da)",
+    "mass_max_label": "Mass Upper Range",
+    "mass_min_label": "Mass Lower Range",
+
+    "time_range_text": "Time Range (Min)",
+    "time_max_label": "Time Upper Range",
+    "time_min_label": "Time Lower Range",
+
+    "near_peak_expander": "**Neighbor Peaks Filter:** Use The Highest Peak As The Base Peak",
+    "manual_mass_label": "Manual Mass (Da)",
+    "current_peak_text": "Current Peak",
+    "neighbor_peak_label": "Neighbor Peak",
+    "intensity_threshold_label": "Intensity Threshold (%)",
+    "intensity_threshold_help": "If the intensity of the neighboring peak is higher than this threshold, it will be considered as a neighbor peak.",
+    "near_peak_help": "❗ For high-resolution mass spectrometry, you need to click the 'Monoisotopic' option to calculate.",
+    "unimode_text": "use the link below to search PTMs in the unimode database",
+    "unimode_button_label": "**PTMs Database:** Unimod",
+    "batch_input_PTMs": "Batch Input PTMs",
+    "batch_input_PTMs_help": "❗ For high-resolution mass spectrometry, you need to click the 'Monoisotopic' option to calculate.",
+
+    "neighbor_display": "**Neighbor Peaks Display**",
+    "prsm_query_expander": "**PSMs Query**",
+
+    "prsm_query_button": "🔍 Search PSMs",
+    "featureid_input_help": "Input the FeatureID that interests you",
+    "prsm_link_column": "**PSMs Link**",
+    "prsm_link_help": "❗ For high-resolution mass spectrometry, you need to click the 'Monoisotopic' option to calculate."
+    
+
+
+}
