@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLabel, QVBoxLayout,
                             QHBoxLayout, QGroupBox, QLineEdit, QFileDialog,
                             QMessageBox)
-from .Setting import Setting
+from .Setting import ToolsSetting
 import os
 import subprocess
 import tempfile
@@ -10,32 +10,8 @@ class ToolsTab(QWidget):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        self.setting = Setting()
+        self.setting = ToolsSetting()
         self._init_ui()
-    
-    def check(self) -> bool:
-        if not self.args.get_tool_path('msconvert'):
-            print("MSConvert路径为空，请选择有效的路径。")
-            return False
-        if not self.args.get_tool_path('toppic'):
-            print("TopPIC路径为空，请选择有效的路径。")
-            return False
-        if not self.args.get_tool_path('pbfgen'):
-            print("PBFGen路径为空，请选择有效的路径。")
-            return False
-        if not self.args.get_tool_path('promex'):
-            print("Promex路径为空，请选择有效的路径。")
-            return False
-        if not self.args.get_tool_path('mspathfinder'):
-            print("MSPathFinder路径为空，请选择有效的路径。")
-            return False
-        if not self.args.get_tool_path('spectator'):
-            print("Spectator路径为空，请选择有效的路径。")
-            return False
-        if not self.args.get_tool_path('python'):
-            print("Python路径为空，请选择有效的路径。")
-            return False
-        return True
     
     def _init_ui(self):
         layout = QVBoxLayout()
@@ -55,68 +31,66 @@ class ToolsTab(QWidget):
         layout.addWidget(self._create_promex_group())
         # MSPathFinder路径设置
         layout.addWidget(self._create_mspathfinder_group())
-        # Spectator路径设置
-        layout.addWidget(self._create_spectator_group())
         # 添加Python路径设置 - 移到最下面
-        layout.addWidget(self._create_python_group())
+        # layout.addWidget(self._create_python_group())
         
         layout.addStretch()
         self.setLayout(layout)
     
-    def _create_python_group(self):
-        group = QGroupBox("Python Setting")
-        layout = QVBoxLayout()
+    # def _create_python_group(self):
+    #     group = QGroupBox("Python Setting")
+    #     layout = QVBoxLayout()
         
-        # Python path input row
-        path_layout = QHBoxLayout()
-        python_path = QLineEdit()
-        if self.setting.get_config('Tools', 'python'):
-            python_path.setText(self.setting.get_config('Tools', 'python'))
-            self.args.set_tool_path('python', self.setting.get_config('Tools', 'python'))
-        else:
-            python_path.setPlaceholderText("Please select the path of Python executable")
-        python_path.textChanged.connect(lambda text: (self.args.set_tool_path('python', text), self.setting.set_config('Tools', 'python', text)))
+    #     # Python path input row
+    #     path_layout = QHBoxLayout()
+    #     python_path = QLineEdit()
+    #     if self.setting.get_config('Tools', 'python'):
+    #         python_path.setText(self.setting.get_config('Tools', 'python'))
+    #         self.args.set_tool_path('python', self.setting.get_config('Tools', 'python'))
+    #     else:
+    #         python_path.setPlaceholderText("Please select the path of Python executable")
+    #     python_path.textChanged.connect(lambda text: (self.args.set_tool_path('python', text), self.setting.set_config('Tools', 'python', text)))
         
-        browse_btn = QPushButton("Browse")
-        check_btn = QPushButton("Check")
-        browse_btn.clicked.connect(lambda: self._browse_file(python_path))
-        check_btn.clicked.connect(lambda: self._check_python(python_path.text()))
+    #     browse_btn = QPushButton("Browse")
+    #     check_btn = QPushButton("Check")
+    #     browse_btn.clicked.connect(lambda: self._browse_file(python_path))
+    #     check_btn.clicked.connect(lambda: self._check_python(python_path.text()))
         
-        path_layout.addWidget(QLabel("Python path:"))
-        path_layout.addWidget(python_path)
-        path_layout.addWidget(browse_btn)
-        path_layout.addWidget(check_btn)
+    #     path_layout.addWidget(QLabel("Python path:"))
+    #     path_layout.addWidget(python_path)
+    #     path_layout.addWidget(browse_btn)
+    #     path_layout.addWidget(check_btn)
         
-        # Required libraries info
-        req_label = QLabel("Required libraries: numpy, pyopenms")
-        req_label.setStyleSheet("color: #666; font-style: italic;")
+    #     # Required libraries info
+    #     req_label = QLabel("Required libraries: numpy, pyopenms")
+    #     req_label.setStyleSheet("color: #666; font-style: italic;")
         
-        layout.addLayout(path_layout)
-        layout.addWidget(req_label)
+    #     layout.addLayout(path_layout)
+    #     layout.addWidget(req_label)
         
-        group.setLayout(layout)
-        return group
+    #     group.setLayout(layout)
+    #     return group
     
-    def _check_python(self, python_path):
-        if not python_path:
-            QMessageBox.warning(self, "Warning", "Please select a Python path first.")
-            return
-        try:
-            check_script_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "Tools", "check_library.py")
-            # Check Python version and libraries
-            result = subprocess.run([python_path, check_script_path], capture_output=True, text=True)
+    # def _check_python(self, python_path):
+    #     if not python_path:
+    #         QMessageBox.warning(self, "Warning", "Please select a Python path first.")
+    #         return
+    #     try:
+    #         check_script_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "Tools", "check_library.py")
+    #         # Check Python version and libraries
+    #         result = subprocess.run([python_path, check_script_path], capture_output=True, text=True)
 
-            output = result.stdout.strip()
-            if result.returncode == 0:
-                QMessageBox.information(self, "Success", f"Python check passed!\n\n{output}")
-            else:
-                QMessageBox.warning(self, "Warning", f"Python found, but missing required libraries:\n\n{output}")
+    #         output = result.stdout.strip()
+    #         if result.returncode == 0:
+    #             QMessageBox.information(self, "Success", f"Python check passed!\n\n{output}")
+    #         else:
+    #             QMessageBox.warning(self, "Warning", f"Python found, but missing required libraries:\n\n{output}")
         
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+    #     except Exception as e:
+    #         QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
     
     def _create_msconvert_group(self):
-        group = QGroupBox("MSConvert setting")
+        group = QGroupBox("MSConvert Setting")
         layout = QHBoxLayout()
         msconvert_path = QLineEdit()
         if self.setting.get_config('Tools', 'msconvert'):
@@ -125,8 +99,8 @@ class ToolsTab(QWidget):
         else:
             msconvert_path.setPlaceholderText("Please select the path of MSConvert")
         msconvert_path.textChanged.connect(lambda text: (self.args.set_tool_path('msconvert', text), self.setting.set_config('Tools', 'msconvert', text)))
-        browse_btn = QPushButton("browse")
-        update_btn = QPushButton("update")
+        browse_btn = QPushButton("Browse")
+        update_btn = QPushButton("Update")
         browse_btn.clicked.connect(lambda: self._browse_file(msconvert_path))
         
         layout.addWidget(QLabel("MSConvert path:"))
@@ -283,29 +257,29 @@ class ToolsTab(QWidget):
         group.setLayout(layout)
         return group
 
-    def _create_spectator_group(self):
-        group = QGroupBox("Spectator setting")
-        layout = QHBoxLayout()
-        spectator_path = QLineEdit()
-        if self.setting.get_config('Tools', 'spectator'):
-            spectator_path.setText(self.setting.get_config('Tools', 'spectator'))
-            self.args.set_tool_path('spectator', self.setting.get_config('Tools', 'spectator'))
-        else:
-            spectator_path.setPlaceholderText("Please select the path of Spectator")
-        spectator_path.textChanged.connect(lambda text: (self.args.set_tool_path('spectator', text), self.setting.set_config('Tools', 'spectator', text)))
-        browse_btn = QPushButton("browse")
-        update_btn = QPushButton("update")
-        browse_btn.clicked.connect(lambda: self._browse_file(spectator_path))
+    # def _create_spectator_group(self):
+    #     group = QGroupBox("Spectator setting")
+    #     layout = QHBoxLayout()
+    #     spectator_path = QLineEdit()
+    #     if self.setting.get_config('Tools', 'spectator'):
+    #         spectator_path.setText(self.setting.get_config('Tools', 'spectator'))
+    #         self.args.set_tool_path('spectator', self.setting.get_config('Tools', 'spectator'))
+    #     else:
+    #         spectator_path.setPlaceholderText("Please select the path of Spectator")
+    #     spectator_path.textChanged.connect(lambda text: (self.args.set_tool_path('spectator', text), self.setting.set_config('Tools', 'spectator', text)))
+    #     browse_btn = QPushButton("browse")
+    #     update_btn = QPushButton("update")
+    #     browse_btn.clicked.connect(lambda: self._browse_file(spectator_path))
         
-        layout.addWidget(QLabel("Spectator path:"))
-        layout.addWidget(spectator_path)
-        layout.addWidget(browse_btn)
-        layout.addWidget(update_btn)
-        group.setLayout(layout)
-        return group
+    #     layout.addWidget(QLabel("Spectator path:"))
+    #     layout.addWidget(spectator_path)
+    #     layout.addWidget(browse_btn)
+    #     layout.addWidget(update_btn)
+    #     group.setLayout(layout)
+    #     return group
     
     def _browse_file(self, line_edit):
         from PyQt5.QtWidgets import QFileDialog
-        filename, _ = QFileDialog.getOpenFileName(self, "select file")
+        filename, _ = QFileDialog.getOpenFileName(self, "Select file")
         if filename:
             line_edit.setText(filename)

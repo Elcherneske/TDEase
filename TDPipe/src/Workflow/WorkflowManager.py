@@ -6,7 +6,7 @@ from .PbfgenWorkflow import PbfgenWorkflow
 from .PromexWorkflow import PromexWorkflow
 from .MSpathfinderWorkflow import MSpathfinderWorkflow
 from .PbfgenPromexWorkflow import PbfgenPromexWorkflow
-from .ToppicSuitWorkflow import ToppicSuitWorkflow
+from .ToppicSuiteWorkflow import ToppicSuitWorkflow
 from .SpectrumSumWorkflow import SpectrumSumWorkflow
 
 class WorkflowManager:

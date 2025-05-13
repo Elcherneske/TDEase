@@ -9,6 +9,7 @@ class BaseWorkflow(QThread):
     def __init__(self):
         super().__init__()
         self.commands = []
+        self.process = None
 
     @abstractmethod
     def prepare_workflow(self):
@@ -18,21 +19,24 @@ class BaseWorkflow(QThread):
     def run(self):
         self.prepare_workflow()
         for command in self.commands:
-            self.output_received.emit("command: " + ' '.join(command))
-            process = subprocess.Popen(
+            self.log("command: " + ' '.join(command))
+            self.process = subprocess.Popen(
                 command,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True
             )
             while True:
-                output = process.stdout.readline()
-                if output == '' and process.poll() is not None:
+                output = self.process.stdout.readline()
+                if output == '' and self.process.poll() is not None:
                     break
                 if output:
-                    self.output_received.emit(output)
+                    self.log(output)
                     
-        self.output_received.emit("============Process finished============")
+        self.log("============Process finished============")
+
+    def log(self, text):
+        self.output_received.emit(text)
 
 if __name__ == '__main__':
     import sys

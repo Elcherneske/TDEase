@@ -1,28 +1,13 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                              QGroupBox, QLabel, QComboBox, QLineEdit, QPushButton)
-from .Setting import Setting
+from .Setting import ToolsSetting
 
 class WorkflowConfigTab(QWidget):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        self.setting = Setting()
+        self.setting = ToolsSetting()
         self._init_ui()
-    
-    def check(self) -> bool:
-        if not self.args.get_ms_file_path():
-            print("MS文件路径为空，请选择有效的路径。")
-            return False
-        
-        if not self.args.get_fasta_path():
-            print("FASTA文件路径为空，请选择有效的路径。")
-            return False
-        
-        if not self.args.get_mode():
-            print("工作模式未设置，请选择有效的模式。")
-            return False
-            
-        return True
     
     def _init_ui(self):
         layout = QVBoxLayout()
@@ -63,7 +48,7 @@ class WorkflowConfigTab(QWidget):
         ms_file_path_edit = QLineEdit()
         ms_file_path_edit.setPlaceholderText("Please select the path of MS files")
         ms_file_path_edit.textChanged.connect(lambda text: self.args.set_ms_file_path(text))
-        browse_btn = QPushButton("browse")
+        browse_btn = QPushButton("Browse")
         browse_btn.clicked.connect(lambda: self._browse_ms_files(ms_file_path_edit))
         
         layout.addWidget(QLabel("MS file path:"))
@@ -82,7 +67,7 @@ class WorkflowConfigTab(QWidget):
         else:
             fasta_path_edit.setPlaceholderText("Please select the path of FASTA file")
         fasta_path_edit.textChanged.connect(lambda text: (self.args.set_fasta_path(text), self.setting.set_config('Fasta', 'fasta_path', text)))
-        browse_btn = QPushButton("browse")
+        browse_btn = QPushButton("Browse")
         browse_btn.clicked.connect(lambda: self._browse_fasta_file(fasta_path_edit))
         
         layout.addWidget(QLabel("FASTA file path:"))

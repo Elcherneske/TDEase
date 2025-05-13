@@ -1,30 +1,25 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                             QGroupBox, QLabel, QLineEdit, QPushButton, QTextEdit, QFileDialog)
-from .Setting import Setting
+from .Setting import ToolsSetting
 import os
 import io
 import re
-
+import datetime
 class RunTab(QWidget):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        self.setting = Setting()
+        self.setting = ToolsSetting()
         self.output_text = None
         self.run_button = None
         self.stop_button = None
+        self.vis_button = None
         
         self.log_file = None
         self.log_buffer = io.StringIO()
         self.buffer_size = 0
         self.last_progress_line = ""
         self._init_ui()
-    
-    def check(self) -> bool:
-        if not self.args.get_output_dir():
-            print("输出路径为空，请选择有效的路径。")
-            return False
-        return True
 
     def _is_progress_line(self, text):
         # progress_pattern = re.compile(r'Processing MS\d+ spectrum scan \d+ \.\.\.\s+\d+% finished\.\s*[\r\n]*')
@@ -58,9 +53,10 @@ class RunTab(QWidget):
         # Handle log file writing
         if self.args.get_output_dir():
             if self.log_file is None:
-                log_path = os.path.join(self.args.get_output_dir(), "log.txt")
-                if os.path.exists(log_path):
-                    os.remove(log_path)
+                # 使用当前时间创建日志文件名
+                current_time = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+                log_filename = f"{current_time}_log.txt"
+                log_path = os.path.join(self.args.get_output_dir(), log_filename)
                 try:
                     self.log_file = open(log_path, 'a', encoding='utf-8')
                 except (IOError, OSError) as e:
@@ -96,11 +92,12 @@ class RunTab(QWidget):
         layout.addWidget(self._create_output_group())
         layout.addWidget(self._create_run_button())
         layout.addWidget(self._create_stop_button())
+        layout.addWidget(self._create_vis_button())
         layout.addWidget(self._create_output_text())
         self.setLayout(layout)
     
     def _create_output_group(self):
-        group = QGroupBox("Output setting")
+        group = QGroupBox("Output Setting")
         layout = QHBoxLayout()
         output_path = QLineEdit()
         if self.setting.get_config('Output', 'output_dir'):
@@ -109,10 +106,10 @@ class RunTab(QWidget):
         else:
             output_path.setPlaceholderText("Please select the path of output directory")
         output_path.textChanged.connect(lambda text: (self.setting.set_config('Output', 'output_dir', text), self.args.set_output_dir(text)))
-        browse_btn = QPushButton("browse")
+        browse_btn = QPushButton("Browse")
         browse_btn.clicked.connect(lambda: self._browse_directory(output_path))
         
-        layout.addWidget(QLabel("output path:"))
+        layout.addWidget(QLabel("Output path:"))
         layout.addWidget(output_path)
         layout.addWidget(browse_btn)
         group.setLayout(layout)
@@ -135,6 +132,15 @@ class RunTab(QWidget):
         layout.addWidget(self.stop_btn)
         group.setLayout(layout)
         return group
+
+    def _create_vis_button(self):
+        group = QGroupBox("Visualization")
+        layout = QHBoxLayout()
+        self.vis_btn = QPushButton("Visualization")
+        layout.addWidget(QLabel("Visualization Button:"))
+        layout.addWidget(self.vis_btn)
+        group.setLayout(layout)
+        return group
     
     def _create_output_text(self):
         group = QGroupBox("Output Log")
@@ -147,7 +153,7 @@ class RunTab(QWidget):
         return group
     
     def _browse_directory(self, output_path):
-        directory = QFileDialog.getExistingDirectory(self, "select output directory")
+        directory = QFileDialog.getExistingDirectory(self, "Select output directory")
         if directory:
             output_path.setText(directory)
             self.setting.set_config('Output', 'output_dir', directory)
