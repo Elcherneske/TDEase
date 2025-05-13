@@ -7,7 +7,6 @@ import uuid  # 为了确保PTMS不会被刷新掉
 from ..Utils.FileUtils import FileUtils
 import io
 import os
-
 #本地版本用来打开窗口进行查看
 import tkinter as tk
 from tkinter import filedialog
@@ -27,9 +26,7 @@ class Featuremap():
         self.sample2_color = "#FF0000"
         self.sample1_color = "#0000FF"
         self.compare_mode = False
-        
-        # self.color_scale = [[0.00, "#FFFFFF"], [0.4, "#0000FF"], [0.5, "#FF0000"], [1.00, "#FF0000"]]
-        
+
         if 'color_config' not in st.session_state:
             st.session_state.color_config = {
                 'use_custom': False,
@@ -147,7 +144,6 @@ class Featuremap():
             # 主要样本的3D热图绘制
             main_colorscale = (
                 [[0, '#FFFFFF'], [1, self.sample1_color]] if self.compare_mode 
-                else st.session_state.color_config['custom_colors'] if st.session_state.color_config['use_custom'] 
                 else st.session_state.color_config['color_scale']
             )
 
@@ -194,12 +190,8 @@ class Featuremap():
                 color1 = self.sample1_color
                 color2 = self.sample2_color
             else:
-                # 单样本保持原有配色逻辑 
+                #单样本保持原有配色逻辑 
                 marker_color = self._apply_scale(sorted_df[self.intensity_col])
-                colorscale_sample1 = (
-                    st.session_state.color_config['custom_colors'] if st.session_state.color_config['use_custom'] 
-                    else st.session_state.color_config['color_scale']
-                )
 
             # 主样本绘制
             fig.add_trace(go.Bar(
@@ -208,11 +200,12 @@ class Featuremap():
                 base=sorted_df[self.start_time_col],
                 orientation='h',
                 marker=dict(
-                    color=color1 if self.compare_mode else None,  # 使用固定颜色
-                    colorscale=None if self.compare_mode else colorscale_sample1,
+                    color=color1 if self.compare_mode else marker_color,
+                    colorscale=None if self.compare_mode else st.session_state.color_config['color_scale'],  # 比较模式关闭渐变
                     opacity=0.5 if self.compare_mode else 0.3,  # 使用固定透明度
                     line=dict(width=0)
                 ),
+
                 hoverinfo='text',
                 width=1.6,
                 showlegend = False  
@@ -627,35 +620,26 @@ class Featuremap():
 
 
         advanced_expander_text = self.locale.get("advanced_color_settings_expander", "**高级颜色设置**")
+
         with st.expander(advanced_expander_text):
-            # 初始化会话状态
-            if 'color_config' not in st.session_state:
-                st.session_state.color_config = {
-                    'use_custom': False,
-                    'nodes': 3,
-                    'custom_colors': [],
-                    'color_scale': [[0.00, "#FFFFFF"], [0.4, "#0000FF"], [0.5, "#FF0000"], [1.00, "#FF0000"]]
-                }
 
             # 使用会话状态管理配色状态
             self.use_custom = st.checkbox(
-                self.locale.get("custom_color_checkbox", "**使用自定义颜色**"), 
+                self.locale.get("custom_color_checkbox", "启用自定义配色"),  # 修正国际化标签
                 value=st.session_state.color_config['use_custom'],
                 key='use_custom_color'
             )
             st.session_state.color_config['use_custom'] = self.use_custom
             
+            #用self.use_custom是为了避免复杂的状态调用
             if self.use_custom:
-                color_nodes_text = self.locale.get("color_nodes_text", "颜色节点配置")
-                st.markdown(self.locale.get("color_nodes_help", "添加颜色以及一个节点后,代表颜色会在这个强度比例上渐变到相应的颜色"))
-                
-                # 从会话状态恢复或初始化颜色配置
-                if not st.session_state.color_config['custom_colors']:
-                    st.session_state.color_config['custom_colors'] = [
-                        [0.0, "#FF0000"], 
-                        [0.5, "#0000FF"], 
-                        [1.0, "#00FF00"]
-                    ][:st.session_state.color_config['nodes']]
+                # 增加颜色配置验证
+                if not st.session_state.color_config['custom_colors'] or \
+                len(st.session_state.color_config['custom_colors']) != st.session_state.color_config['nodes']:
+                    st.session_state.color_config['custom_colgers'] = [
+                        [i/(st.session_state.color_config['nodes']-1), "#FFFFFF"] 
+                        for i in range(st.session_state.color_config['nodes'])
+                    ]
 
                 cols = st.columns([1,1,2])
                 with cols[0]:
@@ -677,12 +661,12 @@ class Featuremap():
                         with col1:
                             new_color = st.color_picker(
                                 f"node {i+1} color",
-                                valcolorue=st.session_state.color_config['custom_colors'][i][1],
+                                value=st.session_state.color_config['custom_colors'][i][1],
                                 key=f"color_{i}"
                             )
                         with col2:
                             new_pos = st.number_input(
-                                f"node{i+1} position",
+                                f"node {i+1} position",
                                 min_value=0.0,
                                 max_value=1.0,
                                 value=st.session_state.color_config['custom_colors'][i][0],
@@ -691,14 +675,15 @@ class Featuremap():
                             )
                         updated_colors.append([new_pos, new_color])
                 
-                # 更新并排序颜色配置
-                st.session_state.color_config['custom_colors'] = sorted(updated_colors, key=lambda x: x[0])
-                self.color_scale = st.session_state.color_config['color_scale'] = [
-                    [pos, color] for pos, color in st.session_state.color_config['custom_colors']
+                st.session_state.color_config['custom_colors'] = updated_colors
+                
+                # 更新并排序颜色配置（使用最新的custom_colors）
+                st.session_state.color_config['color_scale'] = [
+                    [pos, color] for pos, color in sorted(
+                        st.session_state.color_config['custom_colors'],
+                        key=lambda x: x[0]
+                    )
                 ]
-            else:
-                # 使用默认配色时保持自定义配置不丢失
-                self.color_scale = st.session_state.color_config['color_scale']
                 
         # 新增多样本展示控制
         compare_expander_text = self.locale.get("compare_settings_expander", "**多样本展示设置**")
@@ -709,20 +694,44 @@ class Featuremap():
                 key='compare_mode_checkbox'
             )
             if self.compare_mode:
-                if st.button(self.locale.get("selectFolder", "📁 Select Report Folder"), key="select_folder2"):
-                    selected_dir = self._open_directory_dialog()
-                    if selected_dir:
-                        st.session_state["user_select_file2"] = selected_dir
-                        # 选择比对样本
 
-                if st.session_state.get('user_select_file2'):
-                    st.session_state.sample2 = st.selectbox(
-                        "选择比对样本",
-                        options=FileUtils.list_samples(st.session_state['user_select_file2']),
-                        index=0,
-                        key='sample2_selector'
-                    )
-                    self._load_data2()
+                #如果是用户从网页端进入,则根据用户的权限来进行数据的比对
+                if st.session_state.authentication_role=='user':
+                    df = FileUtils.query_files(st.session_state.authentication_username)
+                    if not df.empty:
+                        df = df.drop_duplicates(subset=['文件名'])
+                        df.index = df.index + 1
+                        
+                        st.session_state['user_select_file2'] = st.selectbox(
+                            self.locale.get("selectFolder", "📁 选择报告文件夹"),
+                            df['文件名'],
+                            index=None,
+                            key="file_radio"
+                        )
+
+                    if st.session_state.get('user_select_file2'):
+                        st.session_state.sample2 = st.selectbox(
+                            self.locale.get("sample2_selector", "选择比对样本"),
+                            options=FileUtils.list_samples(st.session_state['user_select_file2']),
+                            index=0,
+                            key='sample2_selector'
+                        )
+                        self._load_data2()
+                else:
+
+                    if st.button(self.locale.get("selectFolder", "📁 Select Report Folder"), key="select_folder2"):
+                        selected_dir = self._open_directory_dialog()
+                        if selected_dir:
+                            st.session_state["user_select_file2"] = selected_dir
+                            # 选择比对样本
+                    if st.session_state.get('user_select_file2'):
+                        st.session_state.sample2 = st.selectbox(
+                            "选择比对样本",
+                            options=FileUtils.list_samples(st.session_state['user_select_file2']),
+                            index=0,
+                            key='sample2_selector'
+                        )
+                        self._load_data2()
 
                 col1, col2 = st.columns(2)
                 with col1:

@@ -3,9 +3,9 @@
     
     "mainTitle": "报告界面",
     "selectFolder": "📁 选择报告文件夹",
-    "report_tab_label": "主报告界面",
+    "report_tab_label": "概要",
     "feature_tab_label": "特征图谱",
-    "toppic_tab_label": "TOPPIC结果",
+    "toppic_tab_label": "二级质谱信息",
     "guide_tab_label": "使用指南",
     
     
@@ -77,8 +77,8 @@
     "_comment_general_tips": "通用交互提示",
     
     "fullscreen_tip": "提示：使用表格右上角的按钮可进行全屏查看",
-    "exbasy_text": "📃 可以使用ExBASy工具计算目标蛋白的大致质量",
-    "exbasy_button_label": "ExBASy: 计算蛋白质精确质量",
+    "exbasy_text": "📃 可以使用ExPasy工具计算目标蛋白的大致质量",
+    "exbasy_button_label": "ExPasy: 计算蛋白质精确质量",
     "exbasy_tip": "❗ 对于高分辨质谱，需点击'Monoisotopic'选项进行计算",
     "no_valid_data_warning": "选择范围内无有效数据",
     "no_near_peaks_warning": "指定范围内未找到邻近峰",

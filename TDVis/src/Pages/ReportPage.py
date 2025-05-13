@@ -10,8 +10,6 @@ from . import UserGuide
 from ..Utils.FileUtils import FileUtils
 from ..Utils.ServerUtils import ServerControl
 
-import tkinter as tk
-from tkinter import filedialog
 import json
         
 
@@ -49,14 +47,6 @@ class ReportPage():
     def _sidebar(self):
         """整合所有侧边栏组件"""
         with st.sidebar:
-            if st.button(self.locale.get("selectFolder", "📁 Select Report Folder"), key="select_folder"):
-                selected_dir = self._open_directory_dialog()
-                if selected_dir:
-                    st.session_state["user_select_file"] = selected_dir
-                    # 选择新文件夹时清除所有样本选择
-                    st.session_state.pop("sample", None)
-                    st.session_state.pop("sample2", None)
-
             # 主样本选择
             if st.session_state.get('user_select_file'):
                 file_suffix = os.path.splitext(st.session_state['user_select_file'])[1]
@@ -173,22 +163,4 @@ class ReportPage():
             hide_index=True
         )
         st.markdown(fullscreen_tip)
-        
-    def _open_directory_dialog(self):
-        """Open system directory dialog using Tkinter"""
-        import tkinter as tk
-        from tkinter import filedialog
-        
-        root = tk.Tk()
-        root.wm_attributes('-topmost', 1)  # Add this line
-        root.withdraw()
-        
-        # Force focus on the dialog
-        root.update_idletasks()
-        folder_path = filedialog.askdirectory(parent=root)
-        
-        # Cleanup
-        root.destroy()
-        
-        return os.path.normpath(folder_path) if folder_path else None
         
