@@ -4,7 +4,7 @@ import os
 import subprocess
 import webbrowser
 from PyQt5.QtWidgets import (QWidget, QTabWidget, QHBoxLayout,
-                             QApplication)
+                             QApplication, QMessageBox)
 from Args import Args
 from GUI.ToolsTab import ToolsTab
 from GUI import MSConvertConfigTab
@@ -109,13 +109,19 @@ class AppGUI(QWidget):
     def _streamlit_process(self):
         # 如果进程尚未创建或已经终止，则创建并启动进程
         if self.streamlit_process is None or self.streamlit_process.poll() is not None:
-            dirname = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            dirname = os.path.dirname(os.path.dirname(__file__))
             filename = os.path.join(dirname, 'TDVis', 'MainPage.py')
-            print(filename)
+            if not os.path.exists(filename):
+                QMessageBox.warning(self, "Warning", "Streamlit文件未找到。")
+                return
+            if not self.args.get_tool_path('python'):
+                QMessageBox.warning(self, "Warning", "Python路径未设置。")
+                return
+            
             if self.args.output_dir:
                 # 使用subprocess启动一个独立的进程运行streamlit
                 self.streamlit_process = subprocess.Popen(
-                    [sys.executable, "-m", "streamlit", "run", filename, '--', '--file_path', self.args.output_dir],
+                    [self.args.get_tool_path('python'), "-m", "streamlit", "run", filename, '--', '--file_path', self.args.output_dir],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True
@@ -123,7 +129,7 @@ class AppGUI(QWidget):
             else:
                 # 使用subprocess启动一个独立的进程运行streamlit
                 self.streamlit_process = subprocess.Popen(
-                    [sys.executable, "-m", "streamlit", "run", filename],
+                    [self.args.get_tool_path('python'), "-m", "streamlit", "run", filename],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True

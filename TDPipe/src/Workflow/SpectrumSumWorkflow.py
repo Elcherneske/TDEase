@@ -16,7 +16,7 @@ class SpectrumSumWorkflow(BaseWorkflow):
                 self.commands.append(command)
     
     def _sum_spectrum_command(self, input_file):
-        python_path = sys.executable
+        python_path = self.args.get_tool_path('python')
         if not python_path:
             self.log("Python path is not set. Please configure it in the Tools tab.")
             return None
