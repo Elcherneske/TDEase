@@ -51,8 +51,8 @@ class ToolsTab(QWidget):
             python_path.setPlaceholderText("Please select the path of Python executable")
         python_path.textChanged.connect(lambda text: (self.args.set_tool_path('python', text), self.setting.set_config('Tools', 'python', text)))
         
-        browse_btn = QPushButton("Browse")
-        check_btn = QPushButton("Check")
+        browse_btn = QPushButton("browse")
+        check_btn = QPushButton("check")
         browse_btn.clicked.connect(lambda: self._browse_file(python_path))
         check_btn.clicked.connect(lambda: self._check_python(python_path.text()))
         

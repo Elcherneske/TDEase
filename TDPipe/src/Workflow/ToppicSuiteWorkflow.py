@@ -314,7 +314,7 @@ class ToppicSuitWorkflow(BaseWorkflow):
 
     def _toppic_command(self, input_files):
         if not self.args.tool_paths['toppic']:
-            self.log("TopPIC路径为空，请检查配置。")
+            self.log("TopPIC path is empty, please check the configuration.")
             return None
         
         toppic_command = [self.args.tool_paths['toppic']]
@@ -323,7 +323,7 @@ class ToppicSuitWorkflow(BaseWorkflow):
             toppic_command.append('--activation')
             toppic_command.append(self.args.get_toppic_config_option('activation'))
         
-        if self.args.get_toppic_config_option('fixed_mod'):
+        if self.args.get_toppic_config_option('fixed_mod') and self.args.get_toppic_config_option('fixed_mod') != 'Custom':
             toppic_command.append('--fixed-mod')
             toppic_command.append(self.args.get_toppic_config_option('fixed_mod'))
 

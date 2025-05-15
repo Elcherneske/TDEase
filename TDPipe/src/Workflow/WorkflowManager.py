@@ -21,7 +21,7 @@ class WorkflowManager:
             'promex': PromexWorkflow,
             'mspathfinder': MSpathfinderWorkflow,
             'pbfgen and promex': PbfgenPromexWorkflow,
-            'toppic suit': ToppicSuitWorkflow,
+            'toppic suite': ToppicSuitWorkflow,
             'sum spectrum': SpectrumSumWorkflow,
             # 可以添加更多模式
         }

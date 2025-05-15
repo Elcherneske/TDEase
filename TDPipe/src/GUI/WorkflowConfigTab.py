@@ -31,7 +31,7 @@ class WorkflowConfigTab(QWidget):
             "mspathfinder",
             "pbfgen and promex",
             "sum spectrum",
-            "toppic suit"
+            "toppic suite"
         ])
         self.args.set_mode('msconvert')
         mode_combo.currentTextChanged.connect(
