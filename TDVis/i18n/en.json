@@ -1,16 +1,21 @@
 {
+
     "mainTitle": "Report Interface",
     "selectFolder": "📁 Select Report Folder",
+
     "report_tab_label": "Summary",
-    "feature_tab_label": "Feature Map",
-    "toppic_tab_label": "Ms2 Results",
+    "feature_tab_label": "Main",
+    "toppic_tab_label": "Identification",
     "guide_tab_label": "User Guide",
 
+    "neighbor_range_label":"Mass Range (±Da)",
+    "unimod_text": "You can query the PTMs in the Unimod website below",
+    "unimod_button_label": "PTMs Data Base : Unimod",
 
     "ms1_featuremap_header": "**MS1 Featuremap**",  
-    "featuremap_caption": ":material/star: **FeatureMap:** Displays the time and mass distribution of features,Please select a range on the graph for the next step",  
-    "integration_caption": ":material/star: **Integration:** Displays the integrated spectrum within the selected area",
-    "ptms_caption": ":material/star: **PTMs Matching:** Displays the PTMs matching results within the selected time range",  
+    "featuremap_caption": "⭐ FeatureMap: Displays the time and mass distribution of features,Please select a range to generate integrated spectrum below",  
+    "integration_caption": "⭐ Integration: Select a range to define the base peak for PTMs annotation",
+    "ptms_caption": "⭐PTMs Matching: Displays the PTMs matching results",  
     "heatmap_xaxis_title": "Retention Time (min)",
     "heatmap_yaxis_title": "Mass (Da)",
     "heatmap_title": "Feature Heatmap",
@@ -20,16 +25,15 @@
     "export_spectrum_button_label": "💾 Export Interactive Integrated Spectrum",
     "export_featuremap_button_label": "💾 Export Interactive Feature Map", 
 
-
     "sample_detected_prefix": "__Totally detected in this sample:__",
     "proteins": "Proteins",
     "proteoforms": "Proteoforms",
     "prsms": "Features",
     "units": "items",
+
+
     "folder_not_found_prefix": "⚠️",
     "folder_not_found_suffix": " directory not found",
-
-
     "feature_file_not_found": "❌ Feature file not found",
     "feature_load_failed": "⛔ Failed to load feature data: {0}",
     "prsm_file_not_found": "❌ PrSM data file not found",
@@ -42,27 +46,33 @@
     "custom_ptms_expander": "**Custom PTMs Matching Library**",
     "add_ptms_button": "➕ Add PTMs Rule",
     "del_ptms_button": "➖ Delete Selected Item",
-    "mass_diff_label": "Mass Difference (Da)", 
-    "ptms_type_label": "PTM Type", 
+    "mass_diff_label": "Delta Mass(Da)", 
+    "ptms_type_label": "PTMs Name", 
     "ppm_threshold_label": "Matching Accuracy Threshold (ppm)", 
     "ppm_threshold_help": "If the accuracy exceeds this threshold, it is considered to exceed the mass spectrometry accuracy tolerance range, and there is no matching modification.", 
 
+
     "fullscreen_tip": "Tip: Click the top-right button of the table to enter fullscreen mode",  
-    "exbasy_text": "📃 You can use the ExBasy tool to calculate the approximate mass of your target protein.",
-    "exbasy_button_label": "ExBasy: Calculate Protein Accurate Mass",
+    "exbasy_text": "📃 You can use the ExPasy tool to calculate the theoretical mass of your target protein.",
+    "exbasy_button_label": "ExPasy: Calculate Protein Accurate Mass",
     "exbasy_tip": "❗ For high-resolution mass spectrometry, you need to click the 'Monoisotopic' option to calculate.",
     "no_valid_data_warning": "No valid data within the selected range.",
     "no_near_peaks_warning": "No neighboring peaks found within the specified range.",
 
+
     "select_feature_file": "Select Feature File",
+    "selec_feature_file": "Select Feature File",  
     "current_file": "**Current File**",
     "download_button": "📥 Download Selected File",
+
+
     "heatmap_settings_expander": "**Heatmap Basic Settings**",  
-    "intensity_process": "Intensity Process Method", 
+    "intensity_process": "Intensity Scale", 
     "x_pixel_label": "x-axis Pixel",  
     "y_pixel_label": "y-axis Pixel",  
     "data_limit_label": "Display Data Points Limit",
     "data_limit_help": "Sort by intensity from high to low, display the top n strongest points to clarify the image",  
+
 
     "advanced_color_settings_expander": "**Advanced Color Settings**",  
     "custom_color_checkbox": "Enable Custom Color", 
@@ -73,49 +83,65 @@
     "color_picker_label": "Node {i+1} Color", 
     "position_input_label": "Node {i+1} Position",
 
+
     "detailed_file_view": "**Detailed File View**",
     "open_toppic_report": "📑 Open Toppic Report",
     "table_row_count":"✈ **Table Count：** `{row_count:,}` Items",
     "download_file":"📥 Download{filename}",
-    "selec_feature_file": "Select Feature File",
-    
-    "compare_mode_checkbox": "Compare Mode",
+
+
+    "compare_mode_checkbox": "Comparison Mode",
     "select_sample": "Select A Sample",
-    "compare_settings_expander": "**Compare Settings**",
+    "compare_settings_expander": "**Comparison Settings**",
     "sample1_color_picker": "Primary sample color",
-    "sample2_color_picker": "Compare sample color",
+    "sample2_color_picker": "Comparison sample color",
+
+
     "integration_manual_settings_expander": "**Manual Integration Settings**",
-    "integration_manual_checkbox": "Click To Set Integration Range Mannually",
+    "integration_manual_checkbox": "Click To Set Integration Range Manually",
     "integration_manual_help": "If you are unsatisfied with the automatic integration range, you can set the integration range mannually.",
+
 
     "mass_range_text": "Mass Range (Da)",
     "mass_max_label": "Mass Upper Range",
     "mass_min_label": "Mass Lower Range",
-
     "time_range_text": "Time Range (Min)",
     "time_max_label": "Time Upper Range",
     "time_min_label": "Time Lower Range",
 
-    "near_peak_expander": "**Neighbor Peaks Filter:** Use The Highest Peak As The Base Peak",
-    "manual_mass_label": "Manual Mass (Da)",
+
+    "near_peak_expander": "**Neighboring Peaks Filter:** by default, the highest peak is selected as the base peak.",
+    "manual_mass_label": "Base Peak Mass (Da)",
     "current_peak_text": "Current Peak",
     "neighbor_peak_label": "Neighbor Peak",
     "intensity_threshold_label": "Intensity Threshold (%)",
     "intensity_threshold_help": "If the intensity of the neighboring peak is higher than this threshold, it will be considered as a neighbor peak.",
-    "near_peak_help": "❗ For high-resolution mass spectrometry, you need to click the 'Monoisotopic' option to calculate.",
-    "unimode_text": "use the link below to search PTMs in the unimode database",
+    "near_peak_help": "The delta mass between the base peak and the neighboring peak will be used to identify potential PTMs",
+    "neighbor_display": "**Neighbor Peaks Display**",
+
+   
+    "unimode_text": "use the link below to search PTMs in the unimod database",
     "unimode_button_label": "**PTMs Database:** Unimod",
     "batch_input_PTMs": "Batch Input PTMs",
     "batch_input_PTMs_help": "❗ For high-resolution mass spectrometry, you need to click the 'Monoisotopic' option to calculate.",
+    "batch_input_button": "Batch Input",
 
-    "neighbor_display": "**Neighbor Peaks Display**",
-    "prsm_query_expander": "**PSMs Query**",
-
+    "prsm_query_expander": "**PrSM Query**",
     "prsm_query_button": "🔍 Search PSMs",
     "featureid_input_help": "Input the FeatureID that interests you",
-    "prsm_link_column": "**PSMs Link**",
-    "prsm_link_help": "❗ For high-resolution mass spectrometry, you need to click the 'Monoisotopic' option to calculate."
-    
+    "prsm_link_column": "PrSM Link",
+    "prsm_link_help": "Click The Link To Redirect To The Toppic Report",
+    "view_type_label": "2D/3D View",
+    "data_ascend_label": "Acsending Order",
 
 
+    "show_annotation": "**Show Annotations**",
+    "show_annotation_help": "Check to display annotation in 2D view",
+    "compare_sample_ptms": "Compare Sample PTMs Table",
+    "main_sample_ptms": "Main Sample PTMs Table",
+    "height_bias_text": "Label Height Offset",
+
+    "isotope_offsets_label": "Select Allowed Isotope Shifts",
+    "single_sample_ptms": "PTMs Match Table",
+    "sample2_selector": "Select A Comparison Sample"
 }

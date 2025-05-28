@@ -30,7 +30,7 @@ if __name__ == "__main__":
         sys.argv = [
             "streamlit",
             "run",
-            resolve_path("MainPage.py"),
+            resolve_path("MainPage_web.py"),
             "--logger.level=debug",
             "--global.developmentMode=false"  # 显式关闭开发模式
         ]
