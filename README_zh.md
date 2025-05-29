@@ -85,9 +85,9 @@ dbname = "{your_path}/TDEase/TDVis/src/DBUtils/TDvis_sqlite3.db"
 
 
 1.  源代码下载
-'''pwsh
+```pwsh
 git clone https://github.com/Elcherneske/TDEase.git && cd TDease
-'''
+```
 
 2. 依赖安装
 
