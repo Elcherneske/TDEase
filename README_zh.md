@@ -1,12 +1,23 @@
-# 🧪 TDEase - Top-Down蛋白组学分析工具
 
-✨ TDEase 是专为Top-Down蛋白组学研究设计的自动化数据处理与交互式可视化工具集，包含两大核心模块：
+
+# 🧪 TDEase - Top-Down Proteomics Tools
+
+
+## Language
+[English](README.md)| [中文](README_zh.md)
+
+##  ✨ 介绍
+✨ TDEase 是专为Top-Down蛋白组学研究设计的自动化数据处理与交互式可视化工具集，
+
+能够帮助实验室快速搭建Top-Down 蛋白组学工作流中的数据处理以及可视化展示部分.
+
+包含两个核心模块：
 - 🛠️ **TDpipe**：自动化数据处理流水线
 - 📊 **TDvis**：交互式数据可视化平台
 
 
 ## 🌟 核心优势
-能够帮助实验室快速搭建Top-Down 蛋白组学工作流中的数据处理以及可视化展示部分.
+
 1. **一键部署** 🚀  
    两个模块均提供即用型exe封装，无需复杂配置
 2. **详略得当的UI设计** :
@@ -48,14 +59,29 @@ http://{your_ip}:8501
 ### TDpipe工作流配置
 
 ### TDvis数据库配置
-如果您不需要用户认证
+如果您不需要用户认证,那么您可以忽略该部分
 
+#### postgreSQL
+TDvis_web版本默认使用[PostgreSQL](https://www.postgresql.org/)数据库进行用户管理
+
+PostgreSQL官方提供了详细的引导文档,因此您只需要按照引导下载pgAdmin进行初始的数据库创建
+
+而后在TDvis/DBUtils/dbconfig.toml中进行配置即可!
+
+#### SQlite
+
+数据库已经存在,您只需要将参数文件修改为如下格式,即可使用内置的SQlite先进行试验性的部署.
+```
+[database]
+mode = "sqlite"
+dbname = "{your_path}/TDEase/TDVis/src/DBUtils/TDvis_sqlite3.db"
+```
 
 ## 开发者:
 
 *如果您有自己的独特功能需求,我们欢迎您参与修改*
 
-以下为开发者可以使用的下载方式
+以下为推荐合作开发者使用的下载方式
 
 
 1.  源代码下载
@@ -122,17 +148,9 @@ pyinstaller launch.spec --clean
 ```
 
 
-
-
-
-
 ## TDpipe
 
-TDpipe 是一个有GUI的Top-Down蛋白组学数据处理流程整合工具. 通过自定义GUI,您能够轻易调动各个模块,进行参数设置,并且全程自动运行.
-
-
-
-
+TDpipe 是一个有GUI的Top-Down蛋白组学数据处理流程整合工具. 通过丰富的按键,您能够轻易调动各个模块,进行workflow参数设置,并且全程自动运行该workflow.
 
 
 ## TDvis

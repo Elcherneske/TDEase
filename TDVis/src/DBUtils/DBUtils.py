@@ -240,7 +240,8 @@ class DBUtils:
             return f"json_insert({column}, '$[#]', {placeholder})"
         else:
             raise ValueError("Unsupported database type")
-
+        
+        
     def _initialize_tables(self):
         """自动初始化缺失的业务表（如users表）"""
         required_tables = {
