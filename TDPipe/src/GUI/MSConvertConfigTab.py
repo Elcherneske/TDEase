@@ -64,9 +64,9 @@ class MSConvertConfigTab(QWidget):
         # 添加单独的复选框
         enable_checkbox = QCheckBox("Enable Scan Summing")
         enable_checkbox.setChecked(False)  # 默认不启用
-        self.args.set_msconvert_config_option('scan_summing_enabled', False)
+        self.args.set_config('msconvert', 'scan_summing_enabled', False)
         enable_checkbox.stateChanged.connect(
-            lambda state: self.args.set_msconvert_config_option('scan_summing_enabled', bool(state))
+            lambda state: self.args.set_config('msconvert', 'scan_summing_enabled', bool(state))
         )
         layout.addWidget(enable_checkbox)
         self.ui['scan_summing']['enabled'] = enable_checkbox
@@ -77,7 +77,7 @@ class MSConvertConfigTab(QWidget):
         precursor_tolerance = QDoubleSpinBox()
         precursor_tolerance.setValue(0.05)
         precursor_tolerance.valueChanged.connect(
-            lambda value: self.args.set_msconvert_config_option('scan_summing_precursor_tol', value)
+            lambda value: self.args.set_config('msconvert', 'scan_summing_precursor_tol', value)
         )
         precursor_tol_layout.addWidget(precursor_tolerance)
         layout.addLayout(precursor_tol_layout)
@@ -90,7 +90,7 @@ class MSConvertConfigTab(QWidget):
         scan_time_tolerance.setValue(5)
         scan_time_tolerance.setDecimals(3)
         scan_time_tolerance.valueChanged.connect(
-            lambda value: self.args.set_msconvert_config_option('scan_summing_scan_time_tol', value)
+            lambda value: self.args.set_config('msconvert', 'scan_summing_scan_time_tol', value)
         )
         scan_time_tol_layout.addWidget(scan_time_tolerance)
         layout.addLayout(scan_time_tol_layout)
@@ -103,7 +103,7 @@ class MSConvertConfigTab(QWidget):
         ion_mobility_tolerance.setValue(5)
         ion_mobility_tolerance.setDecimals(3)
         ion_mobility_tolerance.valueChanged.connect(
-            lambda value: self.args.set_msconvert_config_option('scan_summing_ion_mobility_tol', value)
+            lambda value: self.args.set_config('msconvert', 'scan_summing_ion_mobility_tol', value)
         )
         ion_mobility_tol_layout.addWidget(ion_mobility_tolerance)
         layout.addLayout(ion_mobility_tol_layout)
@@ -115,7 +115,7 @@ class MSConvertConfigTab(QWidget):
         sum_ms1_scans = QCheckBox()
         sum_ms1_scans.setChecked(False)
         sum_ms1_scans.stateChanged.connect(
-            lambda state: self.args.set_msconvert_config_option('scan_summing_sum_ms1', bool(state))
+            lambda state: self.args.set_config('msconvert', 'scan_summing_sum_ms1', bool(state))
         )
         sum_ms1_layout.addWidget(sum_ms1_scans)
         layout.addLayout(sum_ms1_layout)
@@ -133,9 +133,9 @@ class MSConvertConfigTab(QWidget):
         # 添加单独的复选框
         enable_checkbox = QCheckBox("Enable Subset Filter")
         enable_checkbox.setChecked(False)  # 默认不启用
-        self.args.set_msconvert_config_option('subset_enabled', False)
+        self.args.set_config('msconvert', 'subset_enabled', False)
         enable_checkbox.stateChanged.connect(
-            lambda state: self.args.set_msconvert_config_option('subset_enabled', bool(state))
+            lambda state: self.args.set_config('msconvert', 'subset_enabled', bool(state))
         )
         layout.addWidget(enable_checkbox)
         self.ui['subset']['enabled'] = enable_checkbox
@@ -154,10 +154,10 @@ class MSConvertConfigTab(QWidget):
         ms_level_container.addLayout(ms_level_layout)
         
         ms_level_min.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_ms_level_min', text)
+            lambda text: self.args.set_config('msconvert', 'subset_ms_level_min', text)
         )
         ms_level_max.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_ms_level_max', text)
+            lambda text: self.args.set_config('msconvert', 'subset_ms_level_max', text)
         )
         layout.addLayout(ms_level_container)
         self.ui['subset']['ms_level_min'] = ms_level_min
@@ -177,10 +177,10 @@ class MSConvertConfigTab(QWidget):
         scan_number_container.addLayout(scan_number_layout)
         
         scan_number_min.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_scan_number_min', text)
+            lambda text: self.args.set_config('msconvert', 'subset_scan_number_min', text)
         )
         scan_number_max.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_scan_number_max', text)
+            lambda text: self.args.set_config('msconvert', 'subset_scan_number_max', text)
         )
         layout.addLayout(scan_number_container)
         self.ui['subset']['scan_number_min'] = scan_number_min
@@ -200,10 +200,10 @@ class MSConvertConfigTab(QWidget):
         scan_time_container.addLayout(scan_time_layout)
                 
         scan_time_min.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_scan_time_min', text)
+            lambda text: self.args.set_config('msconvert', 'subset_scan_time_min', text)
         )
         scan_time_max.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_scan_time_max', text)
+            lambda text: self.args.set_config('msconvert', 'subset_scan_time_max', text)
         )
         layout.addLayout(scan_time_container)
         self.ui['subset']['scan_time_min'] = scan_time_min
@@ -223,10 +223,10 @@ class MSConvertConfigTab(QWidget):
         scan_events_container.addLayout(scan_events_layout)
         
         scan_events_min.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_scan_events_min', text)
+            lambda text: self.args.set_config('msconvert', 'subset_scan_events_min', text)
         )
         scan_events_max.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_scan_events_max', text)
+            lambda text: self.args.set_config('msconvert', 'subset_scan_events_max', text)
         )
         layout.addLayout(scan_events_container)
         self.ui['subset']['scan_events_min'] = scan_events_min
@@ -246,10 +246,10 @@ class MSConvertConfigTab(QWidget):
         charge_states_container.addLayout(charge_states_layout)
 
         charge_states_min.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_charge_states_min', text)
+            lambda text: self.args.set_config('msconvert', 'subset_charge_states_min', text)
         )
         charge_states_max.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_charge_states_max', text)
+            lambda text: self.args.set_config('msconvert', 'subset_charge_states_max', text)
         )
         layout.addLayout(charge_states_container)
         self.ui['subset']['charge_states_min'] = charge_states_min
@@ -269,10 +269,10 @@ class MSConvertConfigTab(QWidget):
         data_points_container.addLayout(data_points_layout)
         
         data_points_min.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_data_points_min', text)
+            lambda text: self.args.set_config('msconvert', 'subset_data_points_min', text)
         )
         data_points_max.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_data_points_max', text)
+            lambda text: self.args.set_config('msconvert', 'subset_data_points_max', text)
         )
         layout.addLayout(data_points_container)
         self.ui['subset']['data_points_min'] = data_points_min
@@ -292,10 +292,10 @@ class MSConvertConfigTab(QWidget):
         collision_energy_container.addLayout(collision_energy_layout)
         
         collision_energy_min.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_collision_energy_min', text)
+            lambda text: self.args.set_config('msconvert', 'subset_collision_energy_min', text)
         )
         collision_energy_max.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_collision_energy_max', text)
+            lambda text: self.args.set_config('msconvert', 'subset_collision_energy_max', text)
         )
         layout.addLayout(collision_energy_container)
         self.ui['subset']['collision_energy_min'] = collision_energy_min
@@ -308,7 +308,7 @@ class MSConvertConfigTab(QWidget):
         scan_polarity.addItems(["Any", "Positive", "Negative"])
         scan_polarity.setCurrentText("Any")
         scan_polarity.currentTextChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_scan_polarity', text)
+            lambda text: self.args.set_config('msconvert', 'subset_scan_polarity', text)
         )
         scan_polarity_layout.addWidget(scan_polarity)
         layout.addLayout(scan_polarity_layout)
@@ -321,7 +321,7 @@ class MSConvertConfigTab(QWidget):
         activation_type.addItems(["Any", "BIRD", "CID", "ECD", "ETD", "ETD+SA", "HCD", "IRMPD", "PD", "PQD", "PSD", "SID", "SORI", "UVPD"])
         activation_type.setCurrentText("Any")
         activation_type.currentTextChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_activation_type', text)
+            lambda text: self.args.set_config('msconvert', 'subset_activation_type', text)
         )
         activation_type_layout.addWidget(activation_type)
         layout.addLayout(activation_type_layout)
@@ -334,7 +334,7 @@ class MSConvertConfigTab(QWidget):
         analysis_type.addItems(["Any", "FT", "IT", "orbi", "quad", "TOF"])
         analysis_type.setCurrentText("Any")
         analysis_type.currentTextChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('subset_analysis_type', text)
+            lambda text: self.args.set_config('msconvert', 'subset_analysis_type', text)
         )
         analysis_type_layout.addWidget(analysis_type)
         layout.addLayout(analysis_type_layout)
@@ -347,9 +347,9 @@ class MSConvertConfigTab(QWidget):
         layout = QHBoxLayout()
         output_combo = QComboBox()
         output_combo.addItems(["mzML", "mzXML", "mgf", "ms1", "ms2"])
-        self.args.set_msconvert_config_option('output_format', 'mzML')
+        self.args.set_config('msconvert', 'output_format', 'mzML')
         output_combo.currentTextChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('output_format', text)
+            lambda text: self.args.set_config('msconvert', 'output_format', text)
         )
         layout.addWidget(QLabel("Output Format:"))
         layout.addWidget(output_combo)
@@ -365,10 +365,10 @@ class MSConvertConfigTab(QWidget):
         # 添加单独的复选框
         enable_checkbox = QCheckBox("Enable Peak Picking")
         enable_checkbox.setChecked(True)  # 默认启用
-        self.args.set_msconvert_config_option('peak_picking_enabled', True)  # 默认值设为True
+        self.args.set_config('msconvert', 'peak_picking_enabled', True)  # 默认值设为True
         
         enable_checkbox.stateChanged.connect(
-            lambda state: self.args.set_msconvert_config_option('peak_picking_enabled', bool(state))
+            lambda state: self.args.set_config('msconvert', 'peak_picking_enabled', bool(state))
         )
         layout.addWidget(enable_checkbox)
         self.ui['peak_picking']['enabled'] = enable_checkbox
@@ -379,9 +379,9 @@ class MSConvertConfigTab(QWidget):
         algorithm_combo = QComboBox()
         algorithm_combo.addItems(["vendor", "cwt"])
         algorithm_combo.setCurrentText("vendor")
-        self.args.set_msconvert_config_option('peak_picking_algorithm', 'vendor')
+        self.args.set_config('msconvert', 'peak_picking_algorithm', 'vendor')
         algorithm_combo.currentTextChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('peak_picking_algorithm', text)
+            lambda text: self.args.set_config('msconvert', 'peak_picking_algorithm', text)
         )
         algorithm_layout.addWidget(algorithm_combo)
         layout.addLayout(algorithm_layout)
@@ -400,10 +400,10 @@ class MSConvertConfigTab(QWidget):
         ms_level_layout.addWidget(ms_level_max)
                 
         ms_level_min.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('peak_picking_ms_level_min', text)
+            lambda text: self.args.set_config('msconvert', 'peak_picking_ms_level_min', text)
         )
         ms_level_max.textChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('peak_picking_ms_level_max', text)
+            lambda text: self.args.set_config('msconvert', 'peak_picking_ms_level_max', text)
         )
         layout.addLayout(ms_level_layout)
         self.ui['peak_picking']['ms_level_min'] = ms_level_min
@@ -415,9 +415,9 @@ class MSConvertConfigTab(QWidget):
         min_snr_spin = QDoubleSpinBox()
         min_snr_spin.setValue(0.1)
         min_snr_spin.setDecimals(2)
-        self.args.set_msconvert_config_option('peak_picking_min_snr', 0.1)
+        self.args.set_config('msconvert', 'peak_picking_min_snr', 0.1)
         min_snr_spin.valueChanged.connect(
-            lambda value: self.args.set_msconvert_config_option('peak_picking_min_snr', value)
+            lambda value: self.args.set_config('msconvert', 'peak_picking_min_snr', value)
         )
         min_snr_layout.addWidget(min_snr_spin)
         layout.addLayout(min_snr_layout)
@@ -429,9 +429,9 @@ class MSConvertConfigTab(QWidget):
         peak_spacing_spin = QDoubleSpinBox()
         peak_spacing_spin.setValue(0.1)
         peak_spacing_spin.setDecimals(2)
-        self.args.set_msconvert_config_option('peak_picking_peak_spacing', 0.1)
+        self.args.set_config('msconvert', 'peak_picking_peak_spacing', 0.1)
         peak_spacing_spin.valueChanged.connect(
-            lambda value: self.args.set_msconvert_config_option('peak_picking_peak_spacing', value)
+            lambda value: self.args.set_config('msconvert', 'peak_picking_peak_spacing', value)
         )
         peak_spacing_layout.addWidget(peak_spacing_spin)
         layout.addLayout(peak_spacing_layout)
@@ -446,9 +446,9 @@ class MSConvertConfigTab(QWidget):
         # mz precision setting
         mz_combo = QComboBox()
         mz_combo.addItems(["32", "64"])
-        self.args.set_msconvert_config_option('mz_precision', '32')
+        self.args.set_config('msconvert', 'mz_precision', '32')
         mz_combo.currentTextChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('mz_precision', text)
+            lambda text: self.args.set_config('msconvert', 'mz_precision', text)
         )
         layout.addWidget(QLabel("m/z Precision:"))
         layout.addWidget(mz_combo)
@@ -457,9 +457,9 @@ class MSConvertConfigTab(QWidget):
         # intensity precision setting 
         intensity_combo = QComboBox()
         intensity_combo.addItems(["32", "64"])
-        self.args.set_msconvert_config_option('intensity_precision', '32')
+        self.args.set_config('msconvert', 'intensity_precision', '32')
         intensity_combo.currentTextChanged.connect(
-            lambda text: self.args.set_msconvert_config_option('intensity_precision', text)
+            lambda text: self.args.set_config('msconvert', 'intensity_precision', text)
         )
         layout.addWidget(QLabel("Intensity Precision:"))
         layout.addWidget(intensity_combo)
@@ -550,17 +550,17 @@ class MSConvertConfigTab(QWidget):
             output_format = setting_instance.get('msconvert', 'output_format')
             if output_format:
                 self.ui['output_format'].setCurrentText(output_format)
-                self.args.set_msconvert_config_option('output_format', output_format)
+                self.args.set_config('msconvert', 'output_format', output_format)
             
             mz_precision = setting_instance.get('msconvert', 'mz_precision')
             if mz_precision:
                 self.ui['mz_precision'].setCurrentText(mz_precision)
-                self.args.set_msconvert_config_option('mz_precision', mz_precision)
+                self.args.set_config('msconvert', 'mz_precision', mz_precision)
             
             intensity_precision = setting_instance.get('msconvert', 'intensity_precision')
             if intensity_precision:
                 self.ui['intensity_precision'].setCurrentText(intensity_precision)
-                self.args.set_msconvert_config_option('intensity_precision', intensity_precision)
+                self.args.set_config('msconvert', 'intensity_precision', intensity_precision)
             
             # Update peak picking settings
             self._update_peak_picking_settings(setting_instance)
@@ -582,7 +582,7 @@ class MSConvertConfigTab(QWidget):
         if enabled and 'enabled' in self.ui['scan_summing']:
             scan_summing_enabled = enabled.lower() == 'true'
             self.ui['scan_summing']['enabled'].setChecked(scan_summing_enabled)
-            self.args.set_msconvert_config_option('scan_summing_enabled', scan_summing_enabled)
+            self.args.set_config('msconvert', 'scan_summing_enabled', scan_summing_enabled)
         
         # Use loop to handle other settings
         for key, widget in self.ui['scan_summing'].items():
@@ -594,14 +594,14 @@ class MSConvertConfigTab(QWidget):
                 if setting_value:
                     if isinstance(widget, QDoubleSpinBox):
                         widget.setValue(float(setting_value))
-                        self.args.set_msconvert_config_option(f'scan_summing_{key}', float(setting_value))
+                        self.args.set_config('msconvert', f'scan_summing_{key}', float(setting_value))
                     elif isinstance(widget, QCheckBox):
                         widget.setChecked(setting_value.lower() == 'true')
-                        self.args.set_msconvert_config_option(f'scan_summing_{key}', setting_value.lower() == 'true')
+                        self.args.set_config('msconvert', f'scan_summing_{key}', setting_value.lower() == 'true')
                 else:
                     if isinstance(widget, QLineEdit):
                         widget.setText(setting_value)
-                        self.args.set_msconvert_config_option(f'scan_summing_{key}', setting_value)
+                        self.args.set_config('msconvert', f'scan_summing_{key}', setting_value)
     
     def _update_subset_settings(self, setting_instance):
         """Update subset settings"""
@@ -610,7 +610,7 @@ class MSConvertConfigTab(QWidget):
         if enabled and 'enabled' in self.ui['subset']:
             subset_enabled = enabled.lower() == 'true'
             self.ui['subset']['enabled'].setChecked(subset_enabled)
-            self.args.set_msconvert_config_option('subset_enabled', subset_enabled)
+            self.args.set_config('msconvert', 'subset_enabled', subset_enabled)
         
         # Use loop to handle other settings
         for key, widget in self.ui['subset'].items():
@@ -622,14 +622,14 @@ class MSConvertConfigTab(QWidget):
                 if setting_value:
                     if isinstance(widget, QLineEdit):
                         widget.setText(setting_value)
-                        self.args.set_msconvert_config_option(f'subset_{key}', setting_value)
+                        self.args.set_config('msconvert', f'subset_{key}', setting_value)
                     elif isinstance(widget, QComboBox):
                         widget.setCurrentText(setting_value)
-                        self.args.set_msconvert_config_option(f'subset_{key}', setting_value)
+                        self.args.set_config('msconvert', f'subset_{key}', setting_value)
                 else:
                     if isinstance(widget, QLineEdit):
                         widget.setText(setting_value)
-                        self.args.set_msconvert_config_option(f'subset_{key}', setting_value)
+                        self.args.set_config('msconvert', f'subset_{key}', setting_value)
 
     def _update_peak_picking_settings(self, setting_instance):
         """Update peak picking settings"""
@@ -638,7 +638,7 @@ class MSConvertConfigTab(QWidget):
         if enabled and 'enabled' in self.ui['peak_picking']:
             peak_picking_enabled = enabled.lower() == 'true'
             self.ui['peak_picking']['enabled'].setChecked(peak_picking_enabled)
-            self.args.set_msconvert_config_option('peak_picking_enabled', peak_picking_enabled)
+            self.args.set_config('msconvert', 'peak_picking_enabled', peak_picking_enabled)
         
         # Use loop to handle other settings
         for key, widget in self.ui['peak_picking'].items():
@@ -650,15 +650,15 @@ class MSConvertConfigTab(QWidget):
                 if setting_value:
                     if isinstance(widget, QComboBox):
                         widget.setCurrentText(setting_value)
-                        self.args.set_msconvert_config_option(f'peak_picking_{key}', setting_value)
+                        self.args.set_config('msconvert', f'peak_picking_{key}', setting_value)
                     elif isinstance(widget, QLineEdit):
                         widget.setText(setting_value)
-                        self.args.set_msconvert_config_option(f'peak_picking_{key}', setting_value)
+                        self.args.set_config('msconvert', f'peak_picking_{key}', setting_value)
                     elif isinstance(widget, QDoubleSpinBox):
                         widget.setValue(float(setting_value))
-                        self.args.set_msconvert_config_option(f'peak_picking_{key}', float(setting_value))
+                        self.args.set_config('msconvert', f'peak_picking_{key}', float(setting_value))
                 else:
                     if isinstance(widget, QLineEdit):
                         widget.setText(setting_value)
-                        self.args.set_msconvert_config_option(f'peak_picking_{key}', setting_value)
+                        self.args.set_config('msconvert', f'peak_picking_{key}', setting_value)
 

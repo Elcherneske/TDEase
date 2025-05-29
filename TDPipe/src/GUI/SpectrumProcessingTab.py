@@ -102,7 +102,7 @@ class SpectrumProcessingTab(QWidget):
                 self.range_radio.setChecked(True)
             elif method == 'precursor':
                 self.precursor_radio.setChecked(True)
-            self.args.set_spectrum_sum_config_option('method', method)
+            self.args.set_config('spectrum_sum', 'method', method)
         
         # 更新其他控件
         for key, widget in self.ui['spectrum_sum'].items():
@@ -111,20 +111,20 @@ class SpectrumProcessingTab(QWidget):
                 if value:
                     if isinstance(widget, QSpinBox):
                         widget.setValue(int(value))
-                        self.args.set_spectrum_sum_config_option(key, int(value))
+                        self.args.set_config('spectrum_sum', key, int(value))
                     elif isinstance(widget, QDoubleSpinBox):
                         widget.setValue(float(value))
-                        self.args.set_spectrum_sum_config_option(key, float(value))
+                        self.args.set_config('spectrum_sum', key, float(value))
                     elif isinstance(widget, QLineEdit):
                         widget.setText(value)
-                        self.args.set_spectrum_sum_config_option(key, value)
+                        self.args.set_config('spectrum_sum', key, value)
                     elif isinstance(widget, QComboBox):
                         widget.setCurrentText(value)
-                        self.args.set_spectrum_sum_config_option(key, value)
+                        self.args.set_config('spectrum_sum', key, value)
                 else:
                     if isinstance(widget, QLineEdit):
                         widget.setText(value)
-                        self.args.set_spectrum_sum_config_option(key, value)
+                        self.args.set_config('spectrum_sum', key, value)
     
     def _create_summing_options_group(self):
         group = QGroupBox("Spectrum Summing Options")
@@ -136,9 +136,9 @@ class SpectrumProcessingTab(QWidget):
             "openms",
             "openmsutils"
         ])
-        self.args.set_spectrum_sum_config_option('tool', 'openms')
+        self.args.set_config('spectrum_sum', 'tool', 'openms')
         tool_combo.currentTextChanged.connect(
-            lambda text: self.args.set_spectrum_sum_config_option('tool', text)
+            lambda text: self.args.set_config('spectrum_sum', 'tool', text)
         )
         tool_layout.addWidget(QLabel("Tools:"))
         tool_layout.addWidget(tool_combo)
@@ -153,7 +153,7 @@ class SpectrumProcessingTab(QWidget):
         self.block_radio.setChecked(True)
         self.block_radio.toggled.connect(self._toggle_summing_options)
         method_group.addButton(self.block_radio)
-        self.args.set_spectrum_sum_config_option('method', 'block')
+        self.args.set_config('spectrum_sum', 'method', 'block')
         self.ui['spectrum_sum']['block'] = self.block_radio
         
         self.range_radio = QRadioButton("Range Summing")
@@ -196,7 +196,7 @@ class SpectrumProcessingTab(QWidget):
         ms_level_combo = QComboBox()
         ms_level_combo.addItems(["MS1", "MS2"])
         ms_level_combo.currentIndexChanged.connect(
-            lambda index: self.args.set_spectrum_sum_config_option('ms_level', index)
+            lambda index: self.args.set_config('spectrum_sum', 'ms_level', index)
         )
         ms_level_layout.addRow("MS Level:", ms_level_combo)
         layout.addLayout(ms_level_layout)
@@ -210,11 +210,11 @@ class SpectrumProcessingTab(QWidget):
         self.range_options_widget.setVisible(self.range_radio.isChecked())
         self.precursor_options_widget.setVisible(self.precursor_radio.isChecked())
         if self.precursor_radio.isChecked():
-            self.args.set_spectrum_sum_config_option('method', 'precursor')
+            self.args.set_config('spectrum_sum', 'method', 'precursor')
         elif self.range_radio.isChecked():
-            self.args.set_spectrum_sum_config_option('method', 'range')
+            self.args.set_config('spectrum_sum', 'method', 'range')
         else:
-            self.args.set_spectrum_sum_config_option('method', 'block')
+            self.args.set_config('spectrum_sum', 'method', 'block')
     
     def _create_block_summing_options(self):
         layout = QFormLayout()
@@ -222,7 +222,7 @@ class SpectrumProcessingTab(QWidget):
         block_size.setRange(2, 100)
         block_size.setValue(5)
         block_size.valueChanged.connect(
-            lambda value: self.args.set_spectrum_sum_config_option('block_size', value)
+            lambda value: self.args.set_config('spectrum_sum', 'block_size', value)
         )
         layout.addRow("Block Size:", block_size)
         self.ui['spectrum_sum']['block_size'] = block_size
@@ -234,7 +234,7 @@ class SpectrumProcessingTab(QWidget):
         start_scan.setRange(1, 100000)
         start_scan.setValue(1)
         start_scan.valueChanged.connect(
-            lambda value: self.args.set_spectrum_sum_config_option('start_scan', value)
+            lambda value: self.args.set_config('spectrum_sum', 'start_scan', value)
         )
         self.ui['spectrum_sum']['start_scan'] = start_scan
         
@@ -242,7 +242,7 @@ class SpectrumProcessingTab(QWidget):
         end_scan.setRange(1, 100000)
         end_scan.setValue(100)
         end_scan.valueChanged.connect(
-            lambda value: self.args.set_spectrum_sum_config_option('end_scan', value)
+            lambda value: self.args.set_config('spectrum_sum', 'end_scan', value)
         )
         self.ui['spectrum_sum']['end_scan'] = end_scan
         
@@ -256,7 +256,7 @@ class SpectrumProcessingTab(QWidget):
         precursor_mz.setRange(0, 100000)
         precursor_mz.setValue(100)
         precursor_mz.valueChanged.connect(
-            lambda value: self.args.set_spectrum_sum_config_option('precursor_mz', value)
+            lambda value: self.args.set_config('spectrum_sum', 'precursor_mz', value)
         )
         self.ui['spectrum_sum']['precursor_mz'] = precursor_mz
 
@@ -264,7 +264,7 @@ class SpectrumProcessingTab(QWidget):
         precursor_rt.setRange(0, 100000)
         precursor_rt.setValue(10)
         precursor_rt.valueChanged.connect(
-            lambda value: self.args.set_spectrum_sum_config_option('precursor_rt', value)
+            lambda value: self.args.set_config('spectrum_sum', 'precursor_rt', value)
         )
         self.ui['spectrum_sum']['precursor_rt'] = precursor_rt
 

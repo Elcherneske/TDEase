@@ -20,6 +20,13 @@ class ToppicConfigTab(QWidget):
         # 创建主布局
         main_layout = QVBoxLayout()
         
+        # Add reference text with clickable link
+        reference_label = QLabel()
+        reference_label.setText('<a href="https://www.toppic.org/software/toppic/manual.html" style="color: blue; font-style: italic;">For detailed parameter descriptions, please refer to the official documentation</a>')
+        reference_label.setOpenExternalLinks(True)
+        reference_label.setWordWrap(True)
+        main_layout.addWidget(reference_label)
+        
         # 添加保存/加载按钮
         buttons_layout = QHBoxLayout()
         save_button = QPushButton("Save Settings")
@@ -150,23 +157,23 @@ class ToppicConfigTab(QWidget):
             if value:
                 if isinstance(widget, QSpinBox):
                     widget.setValue(int(value))
-                    self.args.set_topfd_config_option(key, int(value))
+                    self.args.set_config('topfd', key, int(value))
                 elif isinstance(widget, QDoubleSpinBox):
                     widget.setValue(float(value))
-                    self.args.set_topfd_config_option(key, float(value))
+                    self.args.set_config('topfd', key, float(value))
                 elif isinstance(widget, QLineEdit):
                     widget.setText(value)
-                    self.args.set_topfd_config_option(key, value)
+                    self.args.set_config('topfd', key, value)
                 elif isinstance(widget, QComboBox):
                     widget.setCurrentText(value)
-                    self.args.set_topfd_config_option(key, value)
+                    self.args.set_config('topfd', key, value)
                 elif isinstance(widget, QCheckBox):
                     widget.setChecked(value.lower() == 'true')
-                    self.args.set_topfd_config_option(key, value.lower() == 'true')
+                    self.args.set_config('topfd', key, value.lower() == 'true')
             else:
                 if isinstance(widget, QLineEdit):
                     widget.setText(value)
-                    self.args.set_topfd_config_option(key, value)
+                    self.args.set_config('topfd', key, value)
     
     def _update_toppic_settings(self, setting_instance):
         """从配置更新TopPIC设置"""
@@ -175,23 +182,23 @@ class ToppicConfigTab(QWidget):
             if value:
                 if isinstance(widget, QSpinBox):
                     widget.setValue(int(value))
-                    self.args.set_toppic_config_option(key, int(value))
+                    self.args.set_config('toppic', key, int(value))
                 elif isinstance(widget, QDoubleSpinBox):
                     widget.setValue(float(value))
-                    self.args.set_toppic_config_option(key, float(value))
+                    self.args.set_config('toppic', key, float(value))
                 elif isinstance(widget, QLineEdit):
                     widget.setText(value)
-                    self.args.set_toppic_config_option(key, value)
+                    self.args.set_config('toppic', key, value)
                 elif isinstance(widget, QComboBox):
                     widget.setCurrentText(value)
-                    self.args.set_toppic_config_option(key, value)
+                    self.args.set_config('toppic', key, value)
                 elif isinstance(widget, QCheckBox):
                     widget.setChecked(value.lower() == 'true')
-                    self.args.set_toppic_config_option(key, value.lower() == 'true')
+                    self.args.set_config('toppic', key, value.lower() == 'true')
             else:
                 if isinstance(widget, QLineEdit):
                     widget.setText(value)
-                    self.args.set_toppic_config_option(key, value)
+                    self.args.set_config('toppic', key, value)
     
     def _update_topmg_settings(self, setting_instance):
         """从配置更新TopMG设置"""
@@ -200,23 +207,23 @@ class ToppicConfigTab(QWidget):
             if value:
                 if isinstance(widget, QSpinBox):
                     widget.setValue(int(value))
-                    self.args.set_topmg_config_option(key, int(value))
+                    self.args.set_config('topmg', key, int(value))
                 elif isinstance(widget, QDoubleSpinBox):
                     widget.setValue(float(value))
-                    self.args.set_topmg_config_option(key, float(value))
+                    self.args.set_config('topmg', key, float(value))
                 elif isinstance(widget, QLineEdit):
                     widget.setText(value)
-                    self.args.set_topmg_config_option(key, value)
+                    self.args.set_config('topmg', key, value)
                 elif isinstance(widget, QComboBox):
                     widget.setCurrentText(value)
-                    self.args.set_topmg_config_option(key, value)
+                    self.args.set_config('topmg', key, value)
                 elif isinstance(widget, QCheckBox):
                     widget.setChecked(value.lower() == 'true')
-                    self.args.set_topmg_config_option(key, value.lower() == 'true')
+                    self.args.set_config('topmg', key, value.lower() == 'true')
             else:
                 if isinstance(widget, QLineEdit):
                     widget.setText(value)
-                    self.args.set_topmg_config_option(key, value)
+                    self.args.set_config('topmg', key, value)
 
     def _create_topfd_group(self):
         group = QGroupBox("TopFD Configuration")
@@ -254,10 +261,10 @@ class ToppicConfigTab(QWidget):
         activation_layout = QHBoxLayout()
         activation_layout.addWidget(QLabel("Activation method:"))
         activation_combo = QComboBox()
-        activation_combo.addItems(["CID", "ETD", "HCD", "UVPD", "FILE"])
-        self.args.set_topmg_config_option('activation', 'FILE')
+        activation_combo.addItems(["FILE", "CID", "ETD", "HCD", "UVPD"])
+        self.args.set_config('topmg', 'activation', 'FILE')
         activation_combo.currentTextChanged.connect(
-            lambda text: self.args.set_topmg_config_option('activation', text)
+            lambda text: self.args.set_config('topmg', 'activation', text)
         )
         activation_layout.addWidget(activation_combo)
         self.ui['topmg']['activation'] = activation_combo
@@ -267,9 +274,9 @@ class ToppicConfigTab(QWidget):
         fixed_mod_layout.addWidget(QLabel("Fixed modification:"))
         fixed_mod_combo = QComboBox()
         fixed_mod_combo.addItems(["Custom", "C57", "C58"])
-        self.args.set_topmg_config_option('fixed-mod', 'Custom')
+        self.args.set_config('topmg', 'fixed-mod', 'Custom')
         fixed_mod_combo.currentTextChanged.connect(
-            lambda text: self.args.set_topmg_config_option('fixed-mod', text)
+            lambda text: self.args.set_config('topmg', 'fixed-mod', text)
         )
         fixed_mod_layout.addWidget(fixed_mod_combo)
         self.ui['topmg']['fixed-mod'] = fixed_mod_combo
@@ -277,7 +284,7 @@ class ToppicConfigTab(QWidget):
         fixed_mod_file_layout = QHBoxLayout()
         fixed_mod_file = QLineEdit()
         fixed_mod_file.textChanged.connect(
-            lambda text: self.args.set_topmg_config_option('fixed-mod-file', text)
+            lambda text: self.args.set_config('topmg', 'fixed-mod-file', text)
         )
         browse_fixed_mod = QPushButton("Browse")
         browse_fixed_mod.clicked.connect(
@@ -293,7 +300,7 @@ class ToppicConfigTab(QWidget):
         n_terminal_form_input = QLineEdit()
         n_terminal_form_input.setText("NONE,NME,NME_ACETYLATION,M_ACETYLATION")
         n_terminal_form_input.textChanged.connect(
-            lambda text: self.args.set_topmg_config_option('n-terminal-form', text)
+            lambda text: self.args.set_config('topmg', 'n-terminal-form', text)
         )
         n_terminal_layout.addWidget(n_terminal_form_input)
         self.ui['topmg']['n-terminal-form'] = n_terminal_form_input
@@ -302,7 +309,7 @@ class ToppicConfigTab(QWidget):
         decoy_layout = QHBoxLayout()
         decoy_checkbox = QCheckBox("Use decoy database")
         decoy_checkbox.stateChanged.connect(
-            lambda state: self.args.set_topmg_config_option('decoy', bool(state))
+            lambda state: self.args.set_config('topmg', 'decoy', bool(state))
         )
         decoy_layout.addWidget(decoy_checkbox)
         self.ui['topmg']['decoy'] = decoy_checkbox
@@ -321,9 +328,9 @@ class ToppicConfigTab(QWidget):
         spectrum_cutoff_type_layout.addWidget(QLabel("Spectrum cutoff type:"))
         spectrum_cutoff_type_combo = QComboBox()
         spectrum_cutoff_type_combo.addItems(["EVALUE", "FDR"])
-        self.args.set_topmg_config_option('spectrum-cutoff-type', 'EVALUE')
+        self.args.set_config('topmg', 'spectrum-cutoff-type', 'EVALUE')
         spectrum_cutoff_type_combo.currentTextChanged.connect(
-            lambda text: self.args.set_topmg_config_option('spectrum-cutoff-type', text)
+            lambda text: self.args.set_config('topmg', 'spectrum-cutoff-type', text)
         )
         spectrum_cutoff_type_layout.addWidget(spectrum_cutoff_type_combo)
         self.ui['topmg']['spectrum-cutoff-type'] = spectrum_cutoff_type_combo
@@ -336,9 +343,9 @@ class ToppicConfigTab(QWidget):
         proteoform_cutoff_type_layout.addWidget(QLabel("Proteoform cutoff type:"))
         proteoform_cutoff_type_combo = QComboBox()
         proteoform_cutoff_type_combo.addItems(["EVALUE", "FDR"])
-        self.args.set_topmg_config_option('proteoform-cutoff-type', 'EVALUE')
+        self.args.set_config('topmg', 'proteoform-cutoff-type', 'EVALUE')
         proteoform_cutoff_type_combo.currentTextChanged.connect(
-            lambda text: self.args.set_topmg_config_option('proteoform-cutoff-type', text)
+            lambda text: self.args.set_config('topmg', 'proteoform-cutoff-type', text)
         )
         proteoform_cutoff_type_layout.addWidget(proteoform_cutoff_type_combo)
         self.ui['topmg']['proteoform-cutoff-type'] = proteoform_cutoff_type_combo
@@ -351,7 +358,7 @@ class ToppicConfigTab(QWidget):
         mod_file_layout.addWidget(QLabel("Modification file name:"))
         mod_file_name_input = QLineEdit()
         mod_file_name_input.textChanged.connect(
-            lambda text: self.args.set_topmg_config_option('mod-file-name', text)
+            lambda text: self.args.set_config('topmg', 'mod-file-name', text)
         )
         mod_file_layout.addWidget(mod_file_name_input)
         self.ui['topmg']['mod-file-name'] = mod_file_name_input
@@ -373,9 +380,9 @@ class ToppicConfigTab(QWidget):
         num_shift_layout.addWidget(QLabel("Maximum number of unexpected modifications:"))
         num_shift_combo = QComboBox()
         num_shift_combo.addItems(["0", "1", "2"])
-        self.args.set_topmg_config_option('num-shift', '0')
+        self.args.set_config('topmg', 'num-shift', '0')
         num_shift_combo.currentTextChanged.connect(
-            lambda text: self.args.set_topmg_config_option('num-shift', int(text))
+            lambda text: self.args.set_config('topmg', 'num-shift', int(text))
         )
         num_shift_layout.addWidget(num_shift_combo)
         self.ui['topmg']['num-shift'] = num_shift_combo
@@ -384,7 +391,7 @@ class ToppicConfigTab(QWidget):
         use_asf_diagonal_layout = QHBoxLayout()
         use_asf_diagonal_checkbox = QCheckBox("Use ASF-DIAGONAL method")
         use_asf_diagonal_checkbox.stateChanged.connect(
-            lambda state: self.args.set_topmg_config_option('use-asf-diagonal', bool(state))
+            lambda state: self.args.set_config('topmg', 'use-asf-diagonal', bool(state))
         )
         use_asf_diagonal_layout.addWidget(use_asf_diagonal_checkbox)
         self.ui['topmg']['use-asf-diagonal'] = use_asf_diagonal_checkbox
@@ -393,7 +400,7 @@ class ToppicConfigTab(QWidget):
         whole_protein_only_layout = QHBoxLayout()
         whole_protein_only_checkbox = QCheckBox("Report only proteoforms from whole proteins")
         whole_protein_only_checkbox.stateChanged.connect(
-            lambda state: self.args.set_topmg_config_option('whole-protein-only', bool(state))
+            lambda state: self.args.set_config('topmg', 'whole-protein-only', bool(state))
         )
         whole_protein_only_layout.addWidget(whole_protein_only_checkbox)
         self.ui['topmg']['whole-protein-only'] = whole_protein_only_checkbox
@@ -402,7 +409,7 @@ class ToppicConfigTab(QWidget):
         skip_html_folder_layout = QHBoxLayout()
         skip_html_folder_checkbox = QCheckBox("Skip generation of HTML files")
         skip_html_folder_checkbox.stateChanged.connect(
-            lambda state: self.args.set_topmg_config_option('skip-html-folder', bool(state))
+            lambda state: self.args.set_config('topmg', 'skip-html-folder', bool(state))
         )
         skip_html_folder_layout.addWidget(skip_html_folder_checkbox)
         self.ui['topmg']['skip-html-folder'] = skip_html_folder_checkbox
@@ -412,7 +419,7 @@ class ToppicConfigTab(QWidget):
         combined_file_layout.addWidget(QLabel("Combined file name:"))
         combined_file_name_input = QLineEdit()
         combined_file_name_input.textChanged.connect(
-            lambda text: self.args.set_topmg_config_option('combined-file-name', text)
+            lambda text: self.args.set_config('topmg', 'combined-file-name', text)
         )
         combined_file_layout.addWidget(combined_file_name_input)
         self.ui['topmg']['combined-file-name'] = combined_file_name_input
@@ -421,7 +428,7 @@ class ToppicConfigTab(QWidget):
         keep_temp_files_layout = QHBoxLayout()
         keep_temp_files_checkbox = QCheckBox("Keep temporary files")
         keep_temp_files_checkbox.stateChanged.connect(
-            lambda state: self.args.set_topmg_config_option('keep-temp-files', bool(state))
+            lambda state: self.args.set_config('topmg', 'keep-temp-files', bool(state))
         )
         keep_temp_files_layout.addWidget(keep_temp_files_checkbox)
         self.ui['topmg']['keep-temp-files'] = keep_temp_files_checkbox
@@ -430,7 +437,7 @@ class ToppicConfigTab(QWidget):
         keep_decoy_ids_layout = QHBoxLayout()
         keep_decoy_ids_checkbox = QCheckBox("Keep decoy identifications")
         keep_decoy_ids_checkbox.stateChanged.connect(
-            lambda state: self.args.set_topmg_config_option('keep-decoy-ids', bool(state))
+            lambda state: self.args.set_config('topmg', 'keep-decoy-ids', bool(state))
         )
         keep_decoy_ids_layout.addWidget(keep_decoy_ids_checkbox)
         self.ui['topmg']['keep-decoy-ids'] = keep_decoy_ids_checkbox
@@ -471,10 +478,10 @@ class ToppicConfigTab(QWidget):
         activation_layout = QHBoxLayout()
         activation_layout.addWidget(QLabel("Activation method:"))
         activation_combo = QComboBox()
-        activation_combo.addItems(["CID", "ETD", "HCD", "UVPD"])
-        self.args.set_toppic_config_option('activation', 'CID')
+        activation_combo.addItems(["FILE", "CID", "ETD", "HCD", "UVPD"])
+        self.args.set_config('toppic', 'activation', 'FILE')
         activation_combo.currentTextChanged.connect(
-            lambda text: self.args.set_toppic_config_option('activation', text)
+            lambda text: self.args.set_config('toppic', 'activation', text)
         )
         activation_layout.addWidget(activation_combo)
         self.ui['toppic']['activation'] = activation_combo
@@ -484,17 +491,19 @@ class ToppicConfigTab(QWidget):
         fixed_mod_layout.addWidget(QLabel("Fixed modification:"))
         fixed_mod_combo = QComboBox()
         fixed_mod_combo.addItems(["Custom", "C57", "C58"])
-        self.args.set_toppic_config_option('fixed_mod', 'Custom')
+        self.args.set_config('toppic', 'fixed_mod', 'Custom')
         fixed_mod_combo.currentTextChanged.connect(
-            lambda text: self.args.set_toppic_config_option('fixed_mod', text)
+            lambda text: self.args.set_config('toppic', 'fixed_mod', text)
         )
         fixed_mod_layout.addWidget(fixed_mod_combo)
         self.ui['toppic']['fixed_mod'] = fixed_mod_combo
 
+        # Fixed Modification File
         fixed_mod_file_layout = QHBoxLayout()
+        fixed_mod_file_layout.addWidget(QLabel("Custom Fixed modification file:"))
         fixed_mod_file = QLineEdit()
         fixed_mod_file.textChanged.connect(
-            lambda text: self.args.set_toppic_config_option('fixed_mod_file', text)
+            lambda text: self.args.set_config('toppic', 'fixed_mod_file', text)
         )
         browse_fixed_mod = QPushButton("Browse")
         browse_fixed_mod.clicked.connect(
@@ -503,12 +512,24 @@ class ToppicConfigTab(QWidget):
         fixed_mod_file_layout.addWidget(fixed_mod_file)
         fixed_mod_file_layout.addWidget(browse_fixed_mod)
         self.ui['toppic']['fixed_mod_file'] = fixed_mod_file
-        
+
+        # N-terminal Forms
+        n_terminal_layout = QHBoxLayout()
+        n_terminal_layout.addWidget(QLabel("N-terminal forms:"))
+        n_terminal_form_input = QLineEdit()
+        n_terminal_form_input.setText("NONE,NME,NME_ACETYLATION,M_ACETYLATION")
+        n_terminal_form_input.textChanged.connect(
+            lambda text: self.args.set_config('toppic', 'n_terminal_form', text)
+        )
+        n_terminal_layout.addWidget(n_terminal_form_input)
+        self.ui['toppic']['n_terminal_form'] = n_terminal_form_input
+
+        # Variable Modification File
         variable_ptm_layout = QHBoxLayout()
         variable_ptm_layout.addWidget(QLabel("Variable modification file:"))
         variable_ptm_file = QLineEdit()
         variable_ptm_file.textChanged.connect(
-            lambda text: self.args.set_toppic_config_option('variable_ptm_file_name', text)
+            lambda text: self.args.set_config('toppic', 'variable_ptm_file_name', text)
         )
         browse_variable_ptm = QPushButton("Browse")
         browse_variable_ptm.clicked.connect(
@@ -518,43 +539,38 @@ class ToppicConfigTab(QWidget):
         variable_ptm_layout.addWidget(browse_variable_ptm)
         self.ui['toppic']['variable_ptm_file_name'] = variable_ptm_file
 
+        # Local PTM file
+        local_ptm_layout = QHBoxLayout()
+        local_ptm_layout.addWidget(QLabel("Local PTM file:"))
+        local_ptm_file = QLineEdit()
+        local_ptm_file.textChanged.connect(
+            lambda text: self.args.set_config('toppic', 'local_ptm_file_name', text)
+        )
+        browse_local_ptm = QPushButton("Browse")
+        browse_local_ptm.clicked.connect(
+            lambda: self._browse_file(local_ptm_file)
+        )
+        local_ptm_layout.addWidget(local_ptm_file)
+        local_ptm_layout.addWidget(browse_local_ptm)
+        self.ui['toppic']['local_ptm_file_name'] = local_ptm_file
+
         num_shift_layout = self._create_number_input("Max unexpected modifications:", "num_shift", 0, 2, 1, 'toppic')
         min_shift_layout = self._create_number_input("Min mass shift:", "min_shift", -2000, 0, -500, 'toppic', double=True)
         max_shift_layout = self._create_number_input("Max mass shift:", "max_shift", 0, 2000, 500, 'toppic', double=True)
         var_ptm_num_layout = self._create_number_input("Max variable modifications:", "variable_ptm_num", 0, 10, 3, 'toppic')
         
-        layout.addLayout(activation_layout)
-        layout.addLayout(fixed_mod_layout)
-        layout.addLayout(fixed_mod_file_layout)
-        layout.addLayout(variable_ptm_layout)
-        layout.addLayout(num_shift_layout)
-        layout.addLayout(min_shift_layout)
-        layout.addLayout(max_shift_layout)
-        layout.addLayout(var_ptm_num_layout)
-        
         # Error Tolerance
         mass_error_layout = self._create_number_input("Mass error tolerance (PPM):","mass_error_tolerance", 1, 100, 10, 'toppic', double=True)
         proteoform_error_layout = self._create_number_input("Proteoform error tolerance (Da):","proteoform_error_tolerance", 0.1, 10.0, 1.2, 'toppic', double=True)
-
-        layout.addLayout(activation_layout)
-        layout.addLayout(fixed_mod_layout)
-        layout.addLayout(fixed_mod_file_layout)
-        layout.addLayout(variable_ptm_layout)
-        layout.addLayout(num_shift_layout)
-        layout.addLayout(min_shift_layout)
-        layout.addLayout(max_shift_layout)
-        layout.addLayout(var_ptm_num_layout)
-        layout.addLayout(mass_error_layout)
-        layout.addLayout(proteoform_error_layout)
 
         # Cutoff Settings
         spectrum_cutoff_layout = QHBoxLayout()
         spectrum_cutoff_layout.addWidget(QLabel("Spectrum-level cutoff:"))
         spectrum_type = QComboBox()
         spectrum_type.addItems(["EVALUE", "FDR"])   
-        self.args.set_toppic_config_option('spectrum_cutoff_type', 'EVALUE')
+        self.args.set_config('toppic', 'spectrum_cutoff_type', 'EVALUE')
         spectrum_type.currentTextChanged.connect(
-            lambda text: self.args.set_toppic_config_option('spectrum_cutoff_type', text)
+            lambda text: self.args.set_config('toppic', 'spectrum_cutoff_type', text)
         )
         spectrum_cutoff_layout.addWidget(spectrum_type)
         self.ui['toppic']['spectrum_cutoff_type'] = spectrum_type
@@ -565,46 +581,83 @@ class ToppicConfigTab(QWidget):
         proteoform_cutoff_layout.addWidget(QLabel("Proteoform-level cutoff:"))
         proteoform_type = QComboBox()
         proteoform_type.addItems(["EVALUE", "FDR"])
-        self.args.set_toppic_config_option('proteoform_cutoff_type', 'EVALUE')
+        self.args.set_config('toppic', 'proteoform_cutoff_type', 'EVALUE')
         proteoform_type.currentTextChanged.connect(
-            lambda text: self.args.set_toppic_config_option('proteoform_cutoff_type', text)
+            lambda text: self.args.set_config('toppic', 'proteoform_cutoff_type', text)
         )
         proteoform_cutoff_layout.addWidget(proteoform_type)
         self.ui['toppic']['proteoform_cutoff_type'] = proteoform_type
         
         proteoform_value_layout = self._create_number_input("Proteoform-level cutoff value:", "proteoform_cutoff_value", 0.0001, 1.0, 0.01, 'toppic', double=True)
 
-        layout.addLayout(spectrum_cutoff_layout)
-        layout.addLayout(spectrum_value_layout)
-        layout.addLayout(proteoform_cutoff_layout)
-        layout.addLayout(proteoform_value_layout)
+        # Miscore threshold
+        miscore_threshold_layout = self._create_number_input("Miscore threshold:", "miscore_threshold", 0.0, 1.0, 0.15, 'toppic', double=True)
 
         # Performance Settings
         thread_num_layout = self._create_number_input("Thread number:", "thread_number", 1, 32, 1, 'toppic')
         combined_spectra_layout = self._create_number_input("Number of combined spectra:", "num_combined_spectra", 1, 10, 1, 'toppic')
 
+        # Additional Options
         approximate_layout = QHBoxLayout()
         approximate = QCheckBox("Use approximate spectra")
-        self.args.set_toppic_config_option('approximate_spectra', False)
+        self.args.set_config('toppic', 'approximate_spectra', False)
         approximate.stateChanged.connect(
-            lambda state: self.args.set_toppic_config_option('approximate_spectra', bool(state))
+            lambda state: self.args.set_config('toppic', 'approximate_spectra', bool(state))
         )
         approximate_layout.addWidget(approximate)
         self.ui['toppic']['approximate_spectra'] = approximate
         
         lookup_table_layout = QHBoxLayout()
         lookup_table = QCheckBox("Use lookup table")
-        self.args.set_toppic_config_option('lookup_table', False)
+        self.args.set_config('toppic', 'lookup_table', False)
         lookup_table.stateChanged.connect(
-            lambda state: self.args.set_toppic_config_option('lookup_table', bool(state))
+            lambda state: self.args.set_config('toppic', 'lookup_table', bool(state))
         )
         lookup_table_layout.addWidget(lookup_table)
         self.ui['toppic']['lookup_table'] = lookup_table
 
+        no_topfd_feature_layout = QHBoxLayout()
+        no_topfd_feature = QCheckBox("No TopFD feature file")
+        self.args.set_config('toppic', 'no_topfd_feature', False)
+        no_topfd_feature.stateChanged.connect(
+            lambda state: self.args.set_config('toppic', 'no_topfd_feature', bool(state))
+        )
+        no_topfd_feature_layout.addWidget(no_topfd_feature)
+        self.ui['toppic']['no_topfd_feature'] = no_topfd_feature
+
+        keep_decoy_ids_layout = QHBoxLayout()
+        keep_decoy_ids = QCheckBox("Keep decoy identifications")
+        self.args.set_config('toppic', 'keep_decoy_ids', False)
+        keep_decoy_ids.stateChanged.connect(
+            lambda state: self.args.set_config('toppic', 'keep_decoy_ids', bool(state))
+        )
+        keep_decoy_ids_layout.addWidget(keep_decoy_ids)
+        self.ui['toppic']['keep_decoy_ids'] = keep_decoy_ids
+
+        # Add all layouts to the main layout
+        layout.addLayout(activation_layout)
+        layout.addLayout(fixed_mod_layout)
+        layout.addLayout(fixed_mod_file_layout)
+        layout.addLayout(n_terminal_layout)
+        layout.addLayout(variable_ptm_layout)
+        layout.addLayout(local_ptm_layout)
+        layout.addLayout(num_shift_layout)
+        layout.addLayout(min_shift_layout)
+        layout.addLayout(max_shift_layout)
+        layout.addLayout(var_ptm_num_layout)
+        layout.addLayout(mass_error_layout)
+        layout.addLayout(proteoform_error_layout)
+        layout.addLayout(spectrum_cutoff_layout)
+        layout.addLayout(spectrum_value_layout)
+        layout.addLayout(proteoform_cutoff_layout)
+        layout.addLayout(proteoform_value_layout)
+        layout.addLayout(miscore_threshold_layout)
         layout.addLayout(thread_num_layout)
         layout.addLayout(combined_spectra_layout)
         layout.addLayout(approximate_layout)
         layout.addLayout(lookup_table_layout)
+        layout.addLayout(no_topfd_feature_layout)
+        layout.addLayout(keep_decoy_ids_layout)
 
         group.setLayout(layout)
         return group
@@ -618,41 +671,18 @@ class ToppicConfigTab(QWidget):
             spinbox.setDecimals(4)  # 修改为4位小数
             spinbox.setRange(float(min_val), float(max_val))  # 确保范围为浮点数
             spinbox.setValue(float(default))  # 确保默认值为浮点数
-            if group == "topfd":
-                self.args.set_topfd_config_option(arg, float(default))
-                spinbox.valueChanged.connect(
-                    lambda text: self.args.set_topfd_config_option(arg, float(text))
-                )
-            elif group == "topmg":
-                self.args.set_topmg_config_option(arg, float(default))
-                spinbox.valueChanged.connect(
-                    lambda text: self.args.set_topmg_config_option(arg, float(text))
-                )
-            else:
-                self.args.set_toppic_config_option(arg, float(default))
-                spinbox.valueChanged.connect(
-                    lambda text: self.args.set_toppic_config_option(arg, float(text))
-                )
+            self.args.set_config(group, arg, float(default))
+            spinbox.valueChanged.connect(
+                lambda text: self.args.set_config(group, arg, float(text))
+            )
         else:
             spinbox = QSpinBox()
             spinbox.setRange(int(min_val), int(max_val))  # 确保范围为整数
             spinbox.setValue(int(default))  # 确保默认值为整数
-            if group == "topfd":
-                self.args.set_topfd_config_option(arg, int(default))
-                spinbox.valueChanged.connect(
-                    lambda text: self.args.set_topfd_config_option(arg, int(text))
-                )
-            elif group == "topmg":
-                self.args.set_topmg_config_option(arg, int(default))
-                spinbox.valueChanged.connect(
-                    lambda text: self.args.set_topmg_config_option(arg, int(text))
-                )
-            else:
-                self.args.set_toppic_config_option(arg, int(default))
-                spinbox.valueChanged.connect(
-                    lambda text: self.args.set_toppic_config_option(arg, int(text))
-                )
-                
+            self.args.set_config(group, arg, int(default))
+            spinbox.valueChanged.connect(
+                lambda text: self.args.set_config(group, arg, int(text))
+            )   
         # 将控件添加到UI字典中
         self.ui[group][arg] = spinbox
         

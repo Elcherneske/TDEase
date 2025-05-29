@@ -22,8 +22,6 @@ class RunTab(QWidget):
         self._init_ui()
 
     def _is_progress_line(self, text):
-        # progress_pattern = re.compile(r'Processing MS\d+ spectrum scan \d+ \.\.\.\s+\d+% finished\.\s*[\r\n]*')
-        # return progress_pattern.match(text.strip()) is not None
         if "Processing MS" in text and "finished" in text and "spectrum scan" in text:
             return True
         return False
@@ -51,12 +49,12 @@ class RunTab(QWidget):
         self.output_text.append(text)
         
         # Handle log file writing
-        if self.args.get_output_dir():
+        if self.args.get_config('output', None):
             if self.log_file is None:
                 # 使用当前时间创建日志文件名
                 current_time = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
                 log_filename = f"{current_time}_log.txt"
-                log_path = os.path.join(self.args.get_output_dir(), log_filename)
+                log_path = os.path.join(self.args.get_config('output', None), log_filename)
                 try:
                     self.log_file = open(log_path, 'a', encoding='utf-8')
                 except (IOError, OSError) as e:
@@ -102,10 +100,10 @@ class RunTab(QWidget):
         output_path = QLineEdit()
         if self.setting.get_config('Output', 'output_dir'):
             output_path.setText(self.setting.get_config('Output', 'output_dir'))
-            self.args.set_output_dir(self.setting.get_config('Output', 'output_dir'))
+            self.args.set_config("output", None, self.setting.get_config('Output', 'output_dir'))
         else:
             output_path.setPlaceholderText("Please select the path of output directory")
-        output_path.textChanged.connect(lambda text: (self.setting.set_config('Output', 'output_dir', text), self.args.set_output_dir(text)))
+        output_path.textChanged.connect(lambda text: (self.setting.set_config('Output', 'output_dir', text), self.args.set_config("output", None, text)))
         browse_btn = QPushButton("Browse")
         browse_btn.clicked.connect(lambda: self._browse_directory(output_path))
         
@@ -157,4 +155,4 @@ class RunTab(QWidget):
         if directory:
             output_path.setText(directory)
             self.setting.set_config('Output', 'output_dir', directory)
-            self.args.set_output_dir(directory)
+            self.args.set_config('output', None, directory)

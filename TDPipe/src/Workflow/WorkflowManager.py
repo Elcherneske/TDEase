@@ -8,6 +8,7 @@ from .MSpathfinderWorkflow import MSpathfinderWorkflow
 from .PbfgenPromexWorkflow import PbfgenPromexWorkflow
 from .ToppicSuiteWorkflow import ToppicSuitWorkflow
 from .SpectrumSumWorkflow import SpectrumSumWorkflow
+from .InformedProteomicsFullWorkflow import InformedProteomicsFullWorkflow
 
 class WorkflowManager:
     @staticmethod
@@ -20,9 +21,10 @@ class WorkflowManager:
             'pbfgen': PbfgenWorkflow,
             'promex': PromexWorkflow,
             'mspathfinder': MSpathfinderWorkflow,
-            'pbfgen and promex': PbfgenPromexWorkflow,
-            'toppic suite': ToppicSuitWorkflow,
+            'Informed Proteomics MS1-Only': PbfgenPromexWorkflow,
+            'TopPIC Suite': ToppicSuitWorkflow,
             'sum spectrum': SpectrumSumWorkflow,
+            'Informed Proteomics Full': InformedProteomicsFullWorkflow,
             # 可以添加更多模式
         }
         

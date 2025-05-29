@@ -21,6 +21,13 @@ class InformedProteomicsConfigTab(QWidget):
         # 创建主布局
         main_layout = QVBoxLayout()
         
+        # Add reference text with clickable link
+        reference_label = QLabel()
+        reference_label.setText('<a href="https://github.com/PNNL-Comp-Mass-Spec/Informed-Proteomics" style="color: blue; font-style: italic;">For detailed parameter descriptions, please refer to the official documentation</a>')
+        reference_label.setOpenExternalLinks(True)
+        reference_label.setWordWrap(True)
+        main_layout.addWidget(reference_label)
+        
         # 添加保存/加载按钮
         buttons_layout = QHBoxLayout()
         save_button = QPushButton("Save Settings")
@@ -60,7 +67,7 @@ class InformedProteomicsConfigTab(QWidget):
         param_file_layout.addWidget(QLabel("Parameter file:"))
         param_file_edit = QLineEdit()
         param_file_edit.setPlaceholderText("Please select the path of parameter file")
-        param_file_edit.textChanged.connect(lambda text: self.args.set_pbfgen_config_option('ParamFile', text))
+        param_file_edit.textChanged.connect(lambda text: self.args.set_config('pbfgen', 'ParamFile', text))
         browse_btn = QPushButton("Browse")
         browse_btn.clicked.connect(lambda: self._browse_file(param_file_edit))
         param_file_layout.addWidget(param_file_edit)
@@ -95,7 +102,7 @@ class InformedProteomicsConfigTab(QWidget):
         bin_res = QComboBox()
         bin_res.addItems(["1", "2", "4", "8", "16", "32", "64", "128"])
         bin_res.setCurrentText("16")  # 默认值
-        bin_res.currentTextChanged.connect(lambda text: self.args.set_promex_config_option('BinResPPM', int(text)))
+        bin_res.currentTextChanged.connect(lambda text: self.args.set_config('promex', 'BinResPPM', int(text)))
         bin_res_layout.addWidget(bin_res)
         
         # 保存到UI字典
@@ -104,20 +111,20 @@ class InformedProteomicsConfigTab(QWidget):
         # 复选框选项
         feature_map = QCheckBox("Output feature heatmap")
         feature_map.setChecked(True)  # 默认选中
-        self.args.set_promex_config_option('FeatureMap', True)
-        feature_map.stateChanged.connect(lambda state: self.args.set_promex_config_option('FeatureMap', bool(state)))
+        self.args.set_config('promex', 'FeatureMap', True)
+        feature_map.stateChanged.connect(lambda state: self.args.set_config('promex', 'FeatureMap', bool(state)))
         self.ui['promex']['FeatureMap'] = feature_map
         
         score = QCheckBox("Output extended scoring")
         score.setChecked(True)  # 默认选中
-        self.args.set_promex_config_option('Score', True)
-        score.stateChanged.connect(lambda state: self.args.set_promex_config_option('Score', bool(state)))        
+        self.args.set_config('promex', 'Score', True)
+        score.stateChanged.connect(lambda state: self.args.set_config('promex', 'Score', bool(state)))        
         self.ui['promex']['Score'] = score
 
         csv = QCheckBox("Write feature data to CSV")
         csv.setChecked(True)  # 默认选中
-        self.args.set_promex_config_option('csv', True)
-        csv.stateChanged.connect(lambda state: self.args.set_promex_config_option('csv', bool(state)))
+        self.args.set_config('promex', 'csv', True)
+        csv.stateChanged.connect(lambda state: self.args.set_config('promex', 'csv', bool(state)))
         self.ui['promex']['csv'] = csv
 
         # MS1FT文件
@@ -125,7 +132,7 @@ class InformedProteomicsConfigTab(QWidget):
         ms1ft_layout.addWidget(QLabel("MS1FT file:"))
         ms1ft_edit = QLineEdit()
         ms1ft_edit.setPlaceholderText("Path to MS1FT file")
-        ms1ft_edit.textChanged.connect(lambda text: self.args.set_promex_config_option('ms1ft', text))
+        ms1ft_edit.textChanged.connect(lambda text: self.args.set_config('promex', 'ms1ft', text))
         browse_ms1ft = QPushButton("Browse")
         browse_ms1ft.clicked.connect(lambda: self._browse_file(ms1ft_edit))
         ms1ft_layout.addWidget(ms1ft_edit)
@@ -137,7 +144,7 @@ class InformedProteomicsConfigTab(QWidget):
         param_file_layout.addWidget(QLabel("Parameter file:"))
         param_file_edit = QLineEdit()
         param_file_edit.setPlaceholderText("Path to parameter file")
-        param_file_edit.textChanged.connect(lambda text: self.args.set_promex_config_option('ParamFile', text))
+        param_file_edit.textChanged.connect(lambda text: self.args.set_config('promex', 'ParamFile', text))
         browse_param = QPushButton("Browse")
         browse_param.clicked.connect(lambda: self._browse_file(param_file_edit))
         param_file_layout.addWidget(param_file_edit)
@@ -170,7 +177,7 @@ class InformedProteomicsConfigTab(QWidget):
         search_mode = QComboBox()
         search_mode.addItems(["NoInternalCleavage", "SingleInternalCleavage", "MultipleInternalCleavages"])
         search_mode.setCurrentText("SingleInternalCleavage")
-        search_mode.currentTextChanged.connect(lambda text: self.args.set_mspathfinder_config_option('ic', text))
+        search_mode.currentTextChanged.connect(lambda text: self.args.set_config('mspathfinder', 'ic', text))
         search_mode_layout.addWidget(search_mode)
         self.ui['mspathfinder']['ic'] = search_mode
         
@@ -180,7 +187,7 @@ class InformedProteomicsConfigTab(QWidget):
         activation = QComboBox()
         activation.addItems(["CID", "ETD", "HCD", "ECD", "PQD", "UVPD", "Unknown"])
         activation.setCurrentText("Unknown")
-        activation.currentTextChanged.connect(lambda text: self.args.set_mspathfinder_config_option('ActivationMethod', text))
+        activation.currentTextChanged.connect(lambda text: self.args.set_config('mspathfinder', 'ActivationMethod', text))
         activation_layout.addWidget(activation)
         self.ui['mspathfinder']['ActivationMethod'] = activation
         
@@ -206,32 +213,32 @@ class InformedProteomicsConfigTab(QWidget):
         # 复选框选项
         tag_search = QCheckBox("Include Tag-based Search")
         tag_search.setChecked(True)  # 默认选中
-        self.args.set_mspathfinder_config_option('TagSearch', True)
-        tag_search.stateChanged.connect(lambda state: self.args.set_mspathfinder_config_option('TagSearch', bool(state)))
+        self.args.set_config('mspathfinder', 'TagSearch', True)
+        tag_search.stateChanged.connect(lambda state: self.args.set_config('mspathfinder', 'TagSearch', bool(state)))
         self.ui['mspathfinder']['TagSearch'] = tag_search
         
         include_decoys = QCheckBox("Include decoy results")
         include_decoys.setChecked(False)  # 默认不包含
-        self.args.set_mspathfinder_config_option('IncludeDecoys', False)
-        include_decoys.stateChanged.connect(lambda state: self.args.set_mspathfinder_config_option('IncludeDecoys', bool(state)))
+        self.args.set_config('mspathfinder', 'IncludeDecoys', False)
+        include_decoys.stateChanged.connect(lambda state: self.args.set_config('mspathfinder', 'IncludeDecoys', bool(state)))
         self.ui['mspathfinder']['IncludeDecoys'] = include_decoys
 
         use_flip_scoring = QCheckBox("Use FLIP scoring")
         use_flip_scoring.setChecked(False)  # 默认不使用
-        self.args.set_mspathfinder_config_option('UseFlipScoring', False)
-        use_flip_scoring.stateChanged.connect(lambda state: self.args.set_mspathfinder_config_option('UseFlipScoring', bool(state)))
+        self.args.set_config('mspathfinder', 'UseFlipScoring', False)
+        use_flip_scoring.stateChanged.connect(lambda state: self.args.set_config('mspathfinder', 'UseFlipScoring', bool(state)))
         self.ui['mspathfinder']['UseFlipScoring'] = use_flip_scoring
 
         tda_checkbox = QCheckBox("Search decoy database")
         tda_checkbox.setChecked(False)  # 默认不搜索
-        self.args.set_mspathfinder_config_option('tda', 0)
-        tda_checkbox.stateChanged.connect(lambda state: self.args.set_mspathfinder_config_option('tda', 1 if state else 0))
+        self.args.set_config('mspathfinder', 'tda', 0)
+        tda_checkbox.stateChanged.connect(lambda state: self.args.set_config('mspathfinder', 'tda', 1 if state else 0))
         self.ui['mspathfinder']['tda'] = tda_checkbox
 
         overwrite_checkbox = QCheckBox("Overwrite existing results")
         overwrite_checkbox.setChecked(False)  # 默认不覆盖
-        self.args.set_mspathfinder_config_option('overwrite', False)
-        overwrite_checkbox.stateChanged.connect(lambda state: self.args.set_mspathfinder_config_option('overwrite', bool(state)))
+        self.args.set_config('mspathfinder', 'overwrite', False)
+        overwrite_checkbox.stateChanged.connect(lambda state: self.args.set_config('mspathfinder', 'overwrite', bool(state)))
         self.ui['mspathfinder']['overwrite'] = overwrite_checkbox
 
         # 文件选择
@@ -239,7 +246,7 @@ class InformedProteomicsConfigTab(QWidget):
         mod_file_layout.addWidget(QLabel("Modification file:"))
         mod_file_edit = QLineEdit()
         mod_file_edit.setPlaceholderText("Please select the path of modification file")
-        mod_file_edit.textChanged.connect(lambda text: self.args.set_mspathfinder_config_option('ModificationFile', text))
+        mod_file_edit.textChanged.connect(lambda text: self.args.set_config('mspathfinder', 'ModificationFile', text))
         browse_mod = QPushButton("Browse")
         browse_mod.clicked.connect(lambda: self._browse_file(mod_file_edit))
         mod_file_layout.addWidget(mod_file_edit)
@@ -250,7 +257,7 @@ class InformedProteomicsConfigTab(QWidget):
         feature_file_layout.addWidget(QLabel("Feature file:"))
         feature_file_edit = QLineEdit()
         feature_file_edit.setPlaceholderText("Please select the path of feature file")
-        feature_file_edit.textChanged.connect(lambda text: self.args.set_mspathfinder_config_option('FeatureFile', text))
+        feature_file_edit.textChanged.connect(lambda text: self.args.set_config('mspathfinder', 'FeatureFile', text))
         browse_feature = QPushButton("Browse")
         browse_feature.clicked.connect(lambda: self._browse_file(feature_file_edit))
         feature_file_layout.addWidget(feature_file_edit)
@@ -261,7 +268,7 @@ class InformedProteomicsConfigTab(QWidget):
         scans_file_layout.addWidget(QLabel("Scans file:"))
         scans_file_edit = QLineEdit()
         scans_file_edit.setPlaceholderText("Please select the path of scans file")
-        scans_file_edit.textChanged.connect(lambda text: self.args.set_mspathfinder_config_option('ScansFilePath', text))
+        scans_file_edit.textChanged.connect(lambda text: self.args.set_config('mspathfinder', 'ScansFilePath', text))
         browse_scans = QPushButton("Browse")
         browse_scans.clicked.connect(lambda: self._browse_file(scans_file_edit))
         scans_file_layout.addWidget(scans_file_edit)
@@ -272,7 +279,7 @@ class InformedProteomicsConfigTab(QWidget):
         param_file_layout.addWidget(QLabel("Parameter file:"))
         param_file_edit = QLineEdit()
         param_file_edit.setPlaceholderText("Please select the path of parameter file")
-        param_file_edit.textChanged.connect(lambda text: self.args.set_mspathfinder_config_option('ParamFile', text))
+        param_file_edit.textChanged.connect(lambda text: self.args.set_config('mspathfinder', 'ParamFile', text))
         browse_param = QPushButton("Browse")
         browse_param.clicked.connect(lambda: self._browse_file(param_file_edit))
         param_file_layout.addWidget(param_file_edit)
@@ -317,40 +324,18 @@ class InformedProteomicsConfigTab(QWidget):
             spinbox.setDecimals(4)
             spinbox.setRange(float(min_val), float(max_val))
             spinbox.setValue(float(default))
-            if group == "promex":
-                self.args.set_promex_config_option(arg, float(default))
-                spinbox.valueChanged.connect(
-                    lambda value: self.args.set_promex_config_option(arg, float(value))
-                )
-            elif group == "pbfgen":
-                self.args.set_pbfgen_config_option(arg, float(default))
-                spinbox.valueChanged.connect(
-                    lambda value: self.args.set_pbfgen_config_option(arg, float(value))
-                )
-            elif group == "mspathfinder":
-                self.args.set_mspathfinder_config_option(arg, float(default))
-                spinbox.valueChanged.connect(
-                    lambda value: self.args.set_mspathfinder_config_option(arg, float(value))
-                )
+            self.args.set_config(group, arg, float(default))
+            spinbox.valueChanged.connect(
+                lambda value: self.args.set_config(group, arg, float(value))
+            )
         else:
             spinbox = QSpinBox()
             spinbox.setRange(int(min_val), int(max_val))
             spinbox.setValue(int(default))
-            if group == "promex":
-                self.args.set_promex_config_option(arg, int(default))
-                spinbox.valueChanged.connect(
-                    lambda value: self.args.set_promex_config_option(arg, int(value))
-                )
-            elif group == "pbfgen":
-                self.args.set_pbfgen_config_option(arg, int(default))
-                spinbox.valueChanged.connect(
-                    lambda value: self.args.set_pbfgen_config_option(arg, int(value))
-                )
-            elif group == "mspathfinder":
-                self.args.set_mspathfinder_config_option(arg, int(default))
-                spinbox.valueChanged.connect(
-                    lambda value: self.args.set_mspathfinder_config_option(arg, int(value))
-                )
+            self.args.set_config(group, arg, int(default))
+            spinbox.valueChanged.connect(
+                lambda value: self.args.set_config(group, arg, int(value))
+            )
         layout.addWidget(spinbox)
         # 将控件添加到UI字典中
         self.ui[group][arg] = spinbox
@@ -462,23 +447,23 @@ class InformedProteomicsConfigTab(QWidget):
             if value:
                 if isinstance(widget, QSpinBox):
                     widget.setValue(int(value))
-                    self.args.set_pbfgen_config_option(key, int(value))
+                    self.args.set_config('pbfgen', key, int(value))
                 elif isinstance(widget, QDoubleSpinBox):
                     widget.setValue(float(value))
-                    self.args.set_pbfgen_config_option(key, float(value))
+                    self.args.set_config('pbfgen', key, float(value))
                 elif isinstance(widget, QLineEdit):
                     widget.setText(value)
-                    self.args.set_pbfgen_config_option(key, value)
+                    self.args.set_config('pbfgen', key, value)
                 elif isinstance(widget, QComboBox):
                     widget.setCurrentText(value)
-                    self.args.set_pbfgen_config_option(key, value)
+                    self.args.set_config('pbfgen', key, value)
                 elif isinstance(widget, QCheckBox):
                     widget.setChecked(value.lower() == 'true')
-                    self.args.set_pbfgen_config_option(key, value.lower() == 'true')
+                    self.args.set_config('pbfgen', key, value.lower() == 'true')
             else:
                 if isinstance(widget, QLineEdit):
                     widget.setText(value)
-                    self.args.set_pbfgen_config_option(key, value)
+                    self.args.set_config('pbfgen', key, value)
     
     def _update_promex_settings(self, setting_instance):
         """从配置更新ProMex设置"""
@@ -487,23 +472,23 @@ class InformedProteomicsConfigTab(QWidget):
             if value:
                 if isinstance(widget, QSpinBox):
                     widget.setValue(int(value))
-                    self.args.set_promex_config_option(key, int(value))
+                    self.args.set_config('promex', key, int(value))
                 elif isinstance(widget, QDoubleSpinBox):
                     widget.setValue(float(value))
-                    self.args.set_promex_config_option(key, float(value))
+                    self.args.set_config('promex', key, float(value))
                 elif isinstance(widget, QLineEdit):
                     widget.setText(value)
-                    self.args.set_promex_config_option(key, value)
+                    self.args.set_config('promex', key, value)
                 elif isinstance(widget, QComboBox):
                     widget.setCurrentText(value)
-                    self.args.set_promex_config_option(key, value)
+                    self.args.set_config('promex', key, value)
                 elif isinstance(widget, QCheckBox):
                     widget.setChecked(value.lower() == 'true')
-                    self.args.set_promex_config_option(key, value.lower() == 'true')
+                    self.args.set_config('promex', key, value.lower() == 'true')
             else:
                 if isinstance(widget, QLineEdit):
                     widget.setText(value)
-                    self.args.set_promex_config_option(key, value)
+                    self.args.set_config('promex', key, value)
     
     def _update_mspathfinder_settings(self, setting_instance):
         """从配置更新MSPathFinder设置"""
@@ -512,21 +497,21 @@ class InformedProteomicsConfigTab(QWidget):
             if value:
                 if isinstance(widget, QSpinBox):
                     widget.setValue(int(value))
-                    self.args.set_mspathfinder_config_option(key, int(value))
+                    self.args.set_config('mspathfinder', key, int(value))
                 elif isinstance(widget, QDoubleSpinBox):
                     widget.setValue(float(value))
-                    self.args.set_mspathfinder_config_option(key, float(value))
+                    self.args.set_config('mspathfinder', key, float(value))
                 elif isinstance(widget, QLineEdit):
                     widget.setText(value)
-                    self.args.set_mspathfinder_config_option(key, value)
+                    self.args.set_config('mspathfinder', key, value)
                 elif isinstance(widget, QComboBox):
                     widget.setCurrentText(value)
-                    self.args.set_mspathfinder_config_option(key, value)
+                    self.args.set_config('mspathfinder', key, value)
                 elif isinstance(widget, QCheckBox):
                     widget.setChecked(value.lower() == 'true')
-                    self.args.set_mspathfinder_config_option(key, value.lower() == 'true')
+                    self.args.set_config('mspathfinder', key, value.lower() == 'true')
                 else:
                     if isinstance(widget, QLineEdit):
                         widget.setText(value)
-                        self.args.set_mspathfinder_config_option(key, value)
+                        self.args.set_config('mspathfinder', key, value)
 

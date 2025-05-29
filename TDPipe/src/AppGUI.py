@@ -70,7 +70,7 @@ class AppGUI(QWidget):
         self.run_tab.update_output(text)
     
     def _run_process(self):
-        mode = self.args.get_mode()
+        mode = self.args.get_config('workflow', None)
         self.workflow = WorkflowManager.create_workflow(mode, self.args)
         self.workflow.output_received.connect(self.update_output)
         self.workflow.start()
@@ -114,28 +114,21 @@ class AppGUI(QWidget):
             if not os.path.exists(filename):
                 QMessageBox.warning(self, "Warning", "Streamlit文件未找到。")
                 return
-            if not self.args.get_tool_path('python'):
+            if not self.args.get_config('tools', 'python'):
                 QMessageBox.warning(self, "Warning", "Python路径未设置。")
                 return
             
-            if self.args.output_dir:
-                # 使用subprocess启动一个独立的进程运行streamlit
-                self.streamlit_process = subprocess.Popen(
-                    [self.args.get_tool_path('python'), "-m", "streamlit", "run", filename, '--', '--file_path', self.args.output_dir],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True
-                )
-            else:
-                # 使用subprocess启动一个独立的进程运行streamlit
-                self.streamlit_process = subprocess.Popen(
-                    [self.args.get_tool_path('python'), "-m", "streamlit", "run", filename],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True
-                )
+            print("11")
+            # 使用subprocess启动一个独立的进程运行streamlit
+            self.streamlit_process = subprocess.Popen(
+                [self.args.get_config('tools', 'python'), "-m", "streamlit", "run", filename],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
             # 等待一小段时间让Streamlit启动
-            time.sleep(0.5)
+            time.sleep(1)
+            webbrowser.open('http://localhost:8501')
         else:
             # 打开默认浏览器访问streamlit页面
             webbrowser.open('http://localhost:8501')
