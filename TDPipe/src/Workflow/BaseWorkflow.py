@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 import subprocess
 from abc import abstractmethod
+from wakepy import keep
 
 class BaseWorkflow(QThread):
     # 定义信号用于向GUI发送输出
@@ -10,28 +11,34 @@ class BaseWorkflow(QThread):
         super().__init__()
         self.commands = []
         self.process = None
+        self.keep_awake = None
 
     @abstractmethod
     def prepare_workflow(self):
         """准备工作流程，子类必须实现此方法来设置commands"""
         pass
         
-    def run(self):
+    def run(self):         
         self.prepare_workflow()
-        for command in self.commands:
-            self.log("command: " + ' '.join(command))
-            self.process = subprocess.Popen(
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True
-            )
-            while True:
-                output = self.process.stdout.readline()
-                if output == '' and self.process.poll() is not None:
-                    break
-                if output:
-                    self.log(output)
+        with keep.running():
+            for command in self.commands:
+                self.log("command: " + ' '.join(command))
+                self.process = subprocess.Popen(
+                    command,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True
+                )
+                while True:
+                    output = self.process.stdout.readline()
+                    if output == '' and self.process.poll() is not None:
+                        break
+                    if output:
+                        self.log(output)
+                
+                # 等待子进程结束
+                self.process.wait()
+                self.process = None
                     
         self.log("============Process finished============")
 
