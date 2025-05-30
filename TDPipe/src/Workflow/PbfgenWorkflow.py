@@ -21,27 +21,24 @@ class PbfgenWorkflow(BaseWorkflow):
         
         pbfgen_command = [self.args.get_config('tools', 'pbfgen')]
         
-        # Required input file
-        pbfgen_command.append('-i')
-        pbfgen_command.append(input_file)
+        # Add all command line options with values
+        options = {
+            'start': ('-start', str),
+            'end': ('-end', str),
+            'ParamFile': ('-ParamFile', str)
+        }
         
+        # Add options with values
+        for key, (flag, converter) in options.items():
+            value = self.args.get_config('pbfgen', key)
+            if value:
+                pbfgen_command.extend([flag, converter(value)])
+        
+        # Add required input file
+        pbfgen_command.extend(['-i', input_file])
+        
+        # Add output directory if specified
         if self.args.get_config('output', None):
-            pbfgen_command.append('-o')
-            pbfgen_command.append(self.args.get_config('output', None)) 
-
-        # Optional start scan
-        if self.args.get_config('pbfgen', 'start'):
-            pbfgen_command.append('-start')
-            pbfgen_command.append(str(self.args.get_config('pbfgen', 'start')))
-
-        # Optional end scan
-        if self.args.get_config('pbfgen', 'end'):
-            pbfgen_command.append('-end')
-            pbfgen_command.append(str(self.args.get_config('pbfgen', 'end')))
-
-        # Optional parameter file
-        if self.args.get_config('pbfgen', 'ParamFile'):
-            pbfgen_command.append('-ParamFile')
-            pbfgen_command.append(self.args.get_config('pbfgen', 'ParamFile'))
+            pbfgen_command.extend(['-o', self.args.get_config('output', None)])
 
         return pbfgen_command

@@ -82,13 +82,14 @@ class AppGUI(QWidget):
                 try:
                     # 在Windows上，terminate()相当于SIGTERM
                     # 在某些情况下可能不够强硬，所以我们先尝试温和的方式
+                    self.workflow.commands = []
                     self.workflow.process.terminate()
                     
                     # 给进程一点时间来正常关闭
                     time.sleep(0.5)
                     
                     # 检查进程是否仍在运行
-                    if self.workflow.process.poll() is None:
+                    if self.workflow.process and self.workflow.process.poll() is None:
                         # 如果进程仍在运行，使用kill()方法强制终止它
                         # 这相当于向进程发送SIGKILL信号
                         self.workflow.process.kill()
@@ -118,7 +119,6 @@ class AppGUI(QWidget):
                 QMessageBox.warning(self, "Warning", "Python路径未设置。")
                 return
             
-            print("11")
             # 使用subprocess启动一个独立的进程运行streamlit
             self.streamlit_process = subprocess.Popen(
                 [self.args.get_config('tools', 'python'), "-m", "streamlit", "run", filename],
@@ -128,7 +128,6 @@ class AppGUI(QWidget):
             )
             # 等待一小段时间让Streamlit启动
             time.sleep(1)
-            webbrowser.open('http://localhost:8501')
         else:
             # 打开默认浏览器访问streamlit页面
             webbrowser.open('http://localhost:8501')

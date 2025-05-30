@@ -252,174 +252,111 @@ class ToppicSuitWorkflow(BaseWorkflow):
 
         return msconvert_command
     
-    def _topfd_command(self, input_files):
+    def _topfd_command(self, input_files: list[str]):
         if not self.args.get_config('tools', 'topfd'):
             self.log("TopFD path is empty, please check the configuration.")
             return None
         
         topfd_command = [self.args.get_config('tools', 'topfd')]
-        if self.args.get_config('topfd', 'activation'):
-            topfd_command.append('--activation')
-            topfd_command.append(self.args.get_config('topfd', 'activation'))
         
-        if self.args.get_config('topfd', 'max_charge'):
-            topfd_command.append('--max-charge')
-            topfd_command.append(str(self.args.get_config('topfd', 'max_charge')))
+        # Add all command line options based on configuration
+        options = {
+            'activation': ('--activation', str),
+            'max-charge': ('--max-charge', str),
+            'max-mass': ('--max-mass', str),
+            'mz-error': ('--mz-error', str),
+            'ms-one-sn-ratio': ('--ms-one-sn-ratio', str),
+            'ms-two-sn-ratio': ('--ms-two-sn-ratio', str),
+            'precursor-window': ('--precursor-window', str),
+            'ecscore-cutoff': ('--ecscore-cutoff', str),
+            'min-scan-number': ('--min-scan-number', str),
+            'thread-number': ('--thread-number', str)
+        }
         
-        if self.args.get_config('topfd', 'max_mass'):
-            topfd_command.append('--max-mass')
-            topfd_command.append(str(self.args.get_config('topfd', 'max_mass')))
+        # Add options with values
+        for key, (flag, converter) in options.items():
+            value = self.args.get_config('topfd', key)
+            if value:
+                topfd_command.extend([flag, converter(value)])
         
-        if self.args.get_config('topfd', 'mz_error'):
-            topfd_command.append('--mz-error')
-            topfd_command.append(str(self.args.get_config('topfd', 'mz_error')))
+        # Add boolean flags
+        bool_flags = {
+            'missing-level-one': '--missing-level-one',
+            'msdeconv': '--msdeconv',
+            'single-scan-noise': '--single-scan-noise',
+            'disable-additional-feature-search': '--disable-additional-feature-search',
+            'disable-final-filtering': '--disable-final-filtering',
+            'skip-html-folder': '--skip-html-folder'
+        }
         
-        if self.args.get_config('topfd', 'ms1_sn'):
-            topfd_command.append('--ms-one-sn-ratio')
-            topfd_command.append(str(self.args.get_config('topfd', 'ms1_sn')))
+        for key, flag in bool_flags.items():
+            if self.args.get_config('topfd', key):
+                topfd_command.append(flag)
         
-        if self.args.get_config('topfd', 'ms2_sn'):
-            topfd_command.append('--ms-two-sn-ratio')
-            topfd_command.append(str(self.args.get_config('topfd', 'ms2_sn')))
-        
-        if self.args.get_config('topfd', 'precursor_window'):
-            topfd_command.append('--precursor-window')
-            topfd_command.append(str(self.args.get_config('topfd', 'precursor_window')))
-        
-        if self.args.get_config('topfd', 'ecscore_cutoff'):
-            topfd_command.append('--ecscore-cutoff')
-            topfd_command.append(str(self.args.get_config('topfd', 'ecscore_cutoff')))
-        
-        if self.args.get_config('topfd', 'min_scan_number'):
-            topfd_command.append('--min-scan-number')
-            topfd_command.append(str(self.args.get_config('topfd', 'min_scan_number')))
-        
-        if self.args.get_config('topfd', 'thread_number'):
-            topfd_command.append('--thread-number')
-            topfd_command.append(str(self.args.get_config('topfd', 'thread_number')))
-        
-        if self.args.get_config('topfd', 'skip_html_folder'):
-            topfd_command.append('--skip-html-folder')
-        
-        if self.args.get_config('topfd', 'disable_additional_feature_search'):
-            topfd_command.append('--disable-additional-feature-search')
-        
-        if self.args.get_config('topfd', 'disable_final_filtering'):
-            topfd_command.append('--disable-final-filtering')
-
+        # Add input files
         for input_file in input_files:
             topfd_command.append(input_file)
 
         return topfd_command
 
-    def _toppic_command(self, input_files):
+    def _toppic_command(self, input_files: list[str]):
         if not self.args.get_config('tools', 'toppic'):
             self.log("TopPIC path is empty, please check the configuration.")
             return None
         
         toppic_command = [self.args.get_config('tools', 'toppic')]
-
-        if self.args.get_config('toppic', 'activation'):
-            toppic_command.append('--activation')
-            toppic_command.append(self.args.get_config('toppic', 'activation'))
         
-        if self.args.get_config('toppic', 'fixed_mod') and self.args.get_config('toppic', 'fixed_mod') != 'Custom':
-            toppic_command.append('--fixed-mod')
-            toppic_command.append(self.args.get_config('toppic', 'fixed_mod'))
-
-        if self.args.get_config('toppic', 'n_terminal_form'):
-            toppic_command.append('--n-terminal-form')
-            toppic_command.append(self.args.get_config('toppic', 'n_terminal_form'))
-
-        if self.args.get_config('toppic', 'num_shift'):
-            toppic_command.append('--num-shift')
-            toppic_command.append(str(self.args.get_config('toppic', 'num_shift')))
-
-        if self.args.get_config('toppic', 'min_shift'):
-            toppic_command.append('--min-shift')
-            toppic_command.append(str(self.args.get_config('toppic', 'min_shift')))
-
-        if self.args.get_config('toppic', 'max_shift'):
-            toppic_command.append('--max-shift')
-            toppic_command.append(str(self.args.get_config('toppic', 'max_shift')))
-
-        if self.args.get_config('toppic', 'variable_ptm_num'):
-            toppic_command.append('--variable-ptm-num')
-            toppic_command.append(str(self.args.get_config('toppic', 'variable_ptm_num')))
-
-        if self.args.get_config('toppic', 'variable_ptm_file_name'):
-            toppic_command.append('--variable-ptm-file-name')
-            toppic_command.append(self.args.get_config('toppic', 'variable_ptm_file_name'))
-
-        if self.args.get_config('toppic', 'decoy'):
-            toppic_command.append('--decoy')
-
-        if self.args.get_config('toppic', 'mass_error_tolerance'):
-            toppic_command.append('--mass-error-tolerance')
-            toppic_command.append(str(self.args.get_config('toppic', 'mass_error_tolerance')))
-
-        if self.args.get_config('toppic', 'proteoform_error_tolerance'):
-            toppic_command.append('--proteoform-error-tolerance')
-            toppic_command.append(str(self.args.get_config('toppic', 'proteoform_error_tolerance')))
-
-        if self.args.get_config('toppic', 'spectrum_cutoff_type'):
-            toppic_command.append('--spectrum-cutoff-type')
-            toppic_command.append(self.args.get_config('toppic', 'spectrum_cutoff_type'))
+        # Add all command line options with values
+        options = {
+            'activation': ('--activation', str),
+            'fixed-mod': ('--fixed-mod', str),
+            'n-terminal-form': ('--n-terminal-form', str),
+            'num-shift': ('--num-shift', str),
+            'min-shift': ('--min-shift', str),
+            'max-shift': ('--max-shift', str),
+            'variable-ptm-num': ('--variable-ptm-num', str),
+            'variable-ptm-file-name': ('--variable-ptm-file-name', str),
+            'mass-error-tolerance': ('--mass-error-tolerance', str),
+            'proteoform-error-tolerance': ('--proteoform-error-tolerance', str),
+            'spectrum-cutoff-type': ('--spectrum-cutoff-type', str),
+            'spectrum-cutoff-value': ('--spectrum-cutoff-value', str),
+            'proteoform-cutoff-type': ('--proteoform-cutoff-type', str),
+            'proteoform-cutoff-value': ('--proteoform-cutoff-value', str),
+            'local-ptm-file-name': ('--local-ptm-file-name', str),
+            'miscore-threshold': ('--miscore-threshold', str),
+            'thread-number': ('--thread-number', str),
+            'num-combined-spectra': ('--num-combined-spectra', str),
+            'combined-file-name': ('--combined-file-name', str)
+        }
         
-        if self.args.get_config('toppic', 'spectrum_cutoff_value'):
-            toppic_command.append('--spectrum-cutoff-value')
-            toppic_command.append(str(self.args.get_config('toppic', 'spectrum_cutoff_value')))
-
-        if self.args.get_config('toppic', 'proteoform_cutoff_type'):
-            toppic_command.append('--proteoform-cutoff-type')
-            toppic_command.append(self.args.get_config('toppic', 'proteoform_cutoff_type'))
-
-        if self.args.get_config('toppic', 'proteoform_cutoff_value'):
-            toppic_command.append('--proteoform-cutoff-value')
-            toppic_command.append(str(self.args.get_config('toppic', 'proteoform_cutoff_value')))
-
-        if self.args.get_config('toppic', 'approximate_spectra'):
-            toppic_command.append('--approximate-spectra')
-
-        if self.args.get_config('toppic', 'lookup_table'):
-            toppic_command.append('--lookup-table')
-
-        if self.args.get_config('toppic', 'local_ptm_file_name'):
-            toppic_command.append('--local-ptm-file-name')
-            toppic_command.append(self.args.get_config('toppic', 'local_ptm_file_name'))
-
-        if self.args.get_config('toppic', 'miscore_threshold'):
-            toppic_command.append('--miscore-threshold')
-            toppic_command.append(str(self.args.get_config('toppic', 'miscore_threshold')))
-
-        if self.args.get_config('toppic', 'thread_number'):
-            toppic_command.append('--thread-number')
-            toppic_command.append(str(self.args.get_config('toppic', 'thread_number')))
-
-        if self.args.get_config('toppic', 'num_combined_spectra'):
-            toppic_command.append('--num-combined-spectra')
-            toppic_command.append(str(self.args.get_config('toppic', 'num_combined_spectra')))
-
-        if self.args.get_config('toppic', 'combined_file_name'):
-            toppic_command.append('--combined-file-name')
-            toppic_command.append(self.args.get_config('toppic', 'combined_file_name'))
-
-        if self.args.get_config('toppic', 'no_topfd_feature'):
-            toppic_command.append('--no-topfd-feature')
-
-        if self.args.get_config('toppic', 'keep_temp_files'):
-            toppic_command.append('--keep-temp-files')
-
-        if self.args.get_config('toppic', 'keep_decoy_ids'):
-            toppic_command.append('--keep-decoy-ids')
-
-        if self.args.get_config('toppic', 'skip_html_folder'):
-            toppic_command.append('--skip-html-folder')
+        # Add options with values
+        for key, (flag, converter) in options.items():
+            value = self.args.get_config('toppic', key)
+            if value and (key != 'fixed-mod' or value != 'Custom'):
+                toppic_command.extend([flag, converter(value)])
         
+        # Add boolean flags
+        bool_flags = {
+            'decoy': '--decoy',
+            'approximate-spectra': '--approximate-spectra',
+            'lookup-table': '--lookup-table',
+            'no-topfd-feature': '--no-topfd-feature',
+            'keep-temp-files': '--keep-temp-files',
+            'keep-decoy-ids': '--keep-decoy-ids',
+            'skip-html-folder': '--skip-html-folder'
+        }
+        
+        for key, flag in bool_flags.items():
+            if self.args.get_config('toppic', key):
+                toppic_command.append(flag)
+        
+        # Add fasta file
         toppic_command.append(self.fasta_file)
+        
+        # Add input files
+        for input_file in input_files:
+            toppic_command.append(input_file)
 
-        for file in input_files:
-            toppic_command.append(file)
         return toppic_command
 
 

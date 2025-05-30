@@ -7,6 +7,7 @@ import os
 import subprocess
 import tempfile
 import sys
+from PyQt5.QtGui import QFont
 
 class ToolsTab(QWidget):
     def __init__(self, args):
@@ -17,25 +18,37 @@ class ToolsTab(QWidget):
     
     def _init_ui(self):
         layout = QVBoxLayout()
-        # MSConvert路径设置
-        layout.addWidget(self._create_msconvert_group())
-        # TopPIC路径设置
-        layout.addWidget(self._create_toppic_group())
-        # TopFD路径设置
-        layout.addWidget(self._create_topfd_group())
-        # TopMG路径设置
-        layout.addWidget(self._create_topmg_group())
-        # TopDiff路径设置
-        layout.addWidget(self._create_topdiff_group())
-        # PBFGen路径设置
-        layout.addWidget(self._create_pbfgen_group())
-        # Promex路径设置
-        layout.addWidget(self._create_promex_group())
-        # MSPathFinder路径设置
-        layout.addWidget(self._create_mspathfinder_group())
-        # 添加Python路径设置 - 移到最下面
-        layout.addWidget(self._create_python_group())
-        
+        layout.setSpacing(20)
+        # 各工具路径分组
+        group_creators = [
+            self._create_msconvert_group,
+            self._create_toppic_group,
+            self._create_topfd_group,
+            self._create_topmg_group,
+            self._create_topdiff_group,
+            self._create_pbfgen_group,
+            self._create_promex_group,
+            self._create_mspathfinder_group,
+            self._create_python_group
+        ]
+        for creator in group_creators:
+            group = creator()
+            # group.setStyleSheet("""
+            #     QGroupBox {
+            #         background-color: #fafdff;
+            #         border: 2px solid #b0b8c1;
+            #         border-radius: 6px;
+            #         margin-top: 12px;
+            #         font-weight: bold;
+            #     }
+            #     QGroupBox::title {
+            #         color: #3a506b;
+            #         subcontrol-origin: margin;
+            #         left: 10px;
+            #         padding: 0 5px;
+            #     }
+            # """)
+            layout.addWidget(group)
         layout.addStretch()
         self.setLayout(layout)
     

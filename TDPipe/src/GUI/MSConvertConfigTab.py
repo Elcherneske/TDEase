@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, 
                             QGroupBox, QLabel, QComboBox, QCheckBox,
                             QPushButton, QFileDialog, QMessageBox, QDoubleSpinBox,
-                            QSpinBox, QFormLayout, QLineEdit)
+                            QSpinBox, QFormLayout, QLineEdit, QFrame)
+from PyQt5.QtGui import QFont
 from .Setting import Setting
 
 
@@ -20,8 +21,8 @@ class MSConvertConfigTab(QWidget):
         self._init_ui()
     
     def _init_ui(self):
-        layout = QVBoxLayout()
-        
+        main_layout = QVBoxLayout()
+        main_layout.setSpacing(20)
         # 添加保存/加载按钮
         buttons_layout = QHBoxLayout()
         save_button = QPushButton("Save Settings")
@@ -30,30 +31,103 @@ class MSConvertConfigTab(QWidget):
         load_button.clicked.connect(self._load_settings)
         buttons_layout.addWidget(save_button)
         buttons_layout.addWidget(load_button)
-        layout.addLayout(buttons_layout)
-        
+        main_layout.addLayout(buttons_layout)
         # 基本选项分组
         options_group = QGroupBox("MSConvert Basic Options")
+        options_group.setStyleSheet("""
+            QGroupBox {
+                background-color: #f0f8ff;
+                border: 2px solid #4682b4;
+                border-radius: 6px;
+                margin-top: 12px;
+                font-weight: bold;
+            }
+            QGroupBox::title {
+                color: #4682b4;
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+            }
+        """)
         options_layout = QVBoxLayout()
-        
-        # 添加各种配置选项
         options_layout.addLayout(self._create_output_format_layout())
         options_layout.addLayout(self._create_precision_layout())
-        
         options_group.setLayout(options_layout)
-        layout.addWidget(options_group)
-        
-        # 添加Peak Picking分组
-        layout.addWidget(self._create_peak_picking_layout())
-        
-        # 添加Scan Summing功能
-        layout.addWidget(self._create_scan_summing_group())
-        
-        # 添加Subset过滤功能
-        layout.addWidget(self._create_subset_group())
-        
-        layout.addStretch()
-        self.setLayout(layout)
+        main_layout.addWidget(options_group)
+        # 添加分隔线
+        line1 = QFrame()
+        line1.setFrameShape(QFrame.HLine)
+        line1.setFrameShadow(QFrame.Sunken)
+        line1.setStyleSheet("background-color: #4682b4;")
+        main_layout.addWidget(line1)
+        # Peak Picking分组
+        peak_group = self._create_peak_picking_layout()
+        peak_group.setStyleSheet("""
+            QGroupBox {
+                background-color: #fff0f5;
+                border: 2px solid #db7093;
+                border-radius: 6px;
+                margin-top: 12px;
+                font-weight: bold;
+            }
+            QGroupBox::title {
+                color: #db7093;
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+            }
+        """)
+        main_layout.addWidget(peak_group)
+        # 分隔线
+        line2 = QFrame()
+        line2.setFrameShape(QFrame.HLine)
+        line2.setFrameShadow(QFrame.Sunken)
+        line2.setStyleSheet("background-color: #db7093;")
+        main_layout.addWidget(line2)
+        # Scan Summing分组
+        scan_group = self._create_scan_summing_group()
+        scan_group.setStyleSheet("""
+            QGroupBox {
+                background-color: #f0fff0;
+                border: 2px solid #2e8b57;
+                border-radius: 6px;
+                margin-top: 12px;
+                font-weight: bold;
+            }
+            QGroupBox::title {
+                color: #2e8b57;
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+            }
+        """)
+        main_layout.addWidget(scan_group)
+        # 分隔线
+        line3 = QFrame()
+        line3.setFrameShape(QFrame.HLine)
+        line3.setFrameShadow(QFrame.Sunken)
+        line3.setStyleSheet("background-color: #2e8b57;")
+        main_layout.addWidget(line3)
+        # Subset分组
+        subset_group = self._create_subset_group()
+        subset_group.setStyleSheet("""
+            QGroupBox {
+                background-color: #fafdff;
+                border: 2px solid #b0b8c1;
+                border-radius: 6px;
+                margin-top: 12px;
+                font-weight: bold;
+            }
+            QGroupBox::title {
+                color: #3a506b;
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+            }
+        """)
+        main_layout.addWidget(subset_group)
+        main_layout.addStretch()
+        self.setLayout(main_layout)
     
     def _create_scan_summing_group(self):
         group = QGroupBox("Scan Summing Options")

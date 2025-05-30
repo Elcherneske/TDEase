@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QGroupBox,
                             QFormLayout, QButtonGroup, QMessageBox, QDoubleSpinBox)
 from .Setting import Setting
 import os
+from PyQt5.QtGui import QFont
 
 class SpectrumProcessingTab(QWidget):
     def __init__(self, args):
@@ -17,7 +18,7 @@ class SpectrumProcessingTab(QWidget):
     
     def _init_ui(self):
         layout = QVBoxLayout()
-        
+        layout.setSpacing(20)
         # 添加保存/加载按钮
         buttons_layout = QHBoxLayout()
         save_button = QPushButton("Save Settings")
@@ -29,7 +30,23 @@ class SpectrumProcessingTab(QWidget):
         layout.addLayout(buttons_layout)
         
         # Spectrum summing options
-        layout.addWidget(self._create_summing_options_group())
+        group = self._create_summing_options_group()
+        group.setStyleSheet("""
+            QGroupBox {
+                background-color: #fafdff;
+                border: 2px solid #b0b8c1;
+                border-radius: 6px;
+                margin-top: 12px;
+                font-weight: bold;
+            }
+            QGroupBox::title {
+                color: #3a506b;
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+            }
+        """)
+        layout.addWidget(group)
         layout.addStretch()
         self.setLayout(layout)
     

@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                             QGroupBox, QLabel, QLineEdit, QPushButton, QTextEdit, QFileDialog)
+from PyQt5.QtGui import QFont
 from .Setting import ToolsSetting
 import os
 import io
@@ -87,11 +88,43 @@ class RunTab(QWidget):
     
     def _init_ui(self):
         layout = QVBoxLayout()
-        layout.addWidget(self._create_output_group())
-        layout.addWidget(self._create_run_button())
-        layout.addWidget(self._create_stop_button())
-        layout.addWidget(self._create_vis_button())
-        layout.addWidget(self._create_output_text())
+        layout.setSpacing(20)
+
+        # style = """
+        #     QGroupBox {
+        #         background-color: #fafdff;
+        #         border: 2px solid #b0b8c1;
+        #         border-radius: 6px;
+        #         margin-top: 12px;
+        #         font-weight: bold;
+        #     }
+        #     QGroupBox::title {
+        #         color: #3a506b;
+        #         subcontrol-origin: margin;
+        #         left: 10px;
+        #         padding: 0 5px;
+        #     }
+        # """
+        # Output
+        output_group = self._create_output_group()
+        # output_group.setStyleSheet(style)
+        layout.addWidget(output_group)
+        # Run
+        run_group = self._create_run_button()
+        # run_group.setStyleSheet(style)
+        layout.addWidget(run_group)
+        # Stop
+        stop_group = self._create_stop_button()
+        # stop_group.setStyleSheet(style)
+        layout.addWidget(stop_group)
+        # Vis
+        vis_group = self._create_vis_button()
+        # vis_group.setStyleSheet(style)
+        layout.addWidget(vis_group)
+        # Output log
+        log_group = self._create_output_text()
+        # log_group.setStyleSheet(style)
+        layout.addWidget(log_group)
         self.setLayout(layout)
     
     def _create_output_group(self):

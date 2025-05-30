@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                              QGroupBox, QLabel, QComboBox, QLineEdit, QPushButton,
-                             QTextEdit)
+                             QTextEdit, QFrame)
+from PyQt5.QtGui import QFont
 from .Setting import ToolsSetting
 
 
@@ -15,10 +16,38 @@ class WorkflowConfigTab(QWidget):
     
     def _init_ui(self):
         layout = QVBoxLayout()
-        layout.addWidget(self._create_mode_group())
-        layout.addWidget(self._create_file_group())
-        layout.addWidget(self._create_fasta_group())
-        layout.addWidget(self._create_info_group())
+        layout.setSpacing(20)
+        # style = """
+        #     QGroupBox {
+        #         background-color: #fafdff;
+        #         border: 2px solid #b0b8c1;
+        #         border-radius: 6px;
+        #         margin-top: 12px;
+        #         font-weight: bold;
+        #     }
+        #     QGroupBox::title {
+        #         color: #3a506b;
+        #         subcontrol-origin: margin;
+        #         left: 10px;
+        #         padding: 0 5px;
+        #     }
+        # """
+        # Pipeline Mode
+        mode_group = self._create_mode_group()
+        # mode_group.setStyleSheet(style)
+        layout.addWidget(mode_group)
+        # Input Files
+        file_group = self._create_file_group()
+        # file_group.setStyleSheet(style)
+        layout.addWidget(file_group)
+        # FASTA
+        fasta_group = self._create_fasta_group()
+        # fasta_group.setStyleSheet(style)
+        layout.addWidget(fasta_group)
+        # Info
+        info_group = self._create_info_group()
+        # info_group.setStyleSheet(style)
+        layout.addWidget(info_group)
         layout.addStretch()
         self.setLayout(layout)
     

@@ -18,55 +18,42 @@ class TopfdWorkflow(BaseWorkflow):
             return None
         
         topfd_command = [self.args.get_config('tools', 'topfd')]
-        if self.args.get_config('topfd', 'activation'):
-            topfd_command.append('--activation')
-            topfd_command.append(self.args.get_config('topfd', 'activation'))
         
-        if self.args.get_config('topfd', 'max_charge'):
-            topfd_command.append('--max-charge')
-            topfd_command.append(str(self.args.get_config('topfd', 'max_charge')))
+        # Add all command line options based on configuration
+        options = {
+            'activation': ('--activation', str),
+            'max-charge': ('--max-charge', str),
+            'max-mass': ('--max-mass', str),
+            'mz-error': ('--mz-error', str),
+            'ms-one-sn-ratio': ('--ms-one-sn-ratio', str),
+            'ms-two-sn-ratio': ('--ms-two-sn-ratio', str),
+            'precursor-window': ('--precursor-window', str),
+            'ecscore-cutoff': ('--ecscore-cutoff', str),
+            'min-scan-number': ('--min-scan-number', str),
+            'thread-number': ('--thread-number', str)
+        }
         
-        if self.args.get_config('topfd', 'max_mass'):
-            topfd_command.append('--max-mass')
-            topfd_command.append(str(self.args.get_config('topfd', 'max_mass')))
+        # Add options with values
+        for key, (flag, converter) in options.items():
+            value = self.args.get_config('topfd', key)
+            if value:
+                topfd_command.extend([flag, converter(value)])
         
-        if self.args.get_config('topfd', 'mz_error'):
-            topfd_command.append('--mz-error')
-            topfd_command.append(str(self.args.get_config('topfd', 'mz_error')))
+        # Add boolean flags
+        bool_flags = {
+            'missing-level-one': '--missing-level-one',
+            'msdeconv': '--msdeconv',
+            'single-scan-noise': '--single-scan-noise',
+            'disable-additional-feature-search': '--disable-additional-feature-search',
+            'disable-final-filtering': '--disable-final-filtering',
+            'skip-html-folder': '--skip-html-folder'
+        }
         
-        if self.args.get_config('topfd', 'ms1_sn'):
-            topfd_command.append('--ms-one-sn-ratio')
-            topfd_command.append(str(self.args.get_config('topfd', 'ms1_sn')))
+        for key, flag in bool_flags.items():
+            if self.args.get_config('topfd', key):
+                topfd_command.append(flag)
         
-        if self.args.get_config('topfd', 'ms2_sn'):
-            topfd_command.append('--ms-two-sn-ratio')
-            topfd_command.append(str(self.args.get_config('topfd', 'ms2_sn')))
-        
-        if self.args.get_config('topfd', 'precursor_window'):
-            topfd_command.append('--precursor-window')
-            topfd_command.append(str(self.args.get_config('topfd', 'precursor_window')))
-        
-        if self.args.get_config('topfd', 'ecscore_cutoff'):
-            topfd_command.append('--ecscore-cutoff')
-            topfd_command.append(str(self.args.get_config('topfd', 'ecscore_cutoff')))
-        
-        if self.args.get_config('topfd', 'min_scan_number'):
-            topfd_command.append('--min-scan-number')
-            topfd_command.append(str(self.args.get_config('topfd', 'min_scan_number')))
-        
-        if self.args.get_config('topfd', 'thread_number'):
-            topfd_command.append('--thread-number')
-            topfd_command.append(str(self.args.get_config('topfd', 'thread_number')))
-        
-        if self.args.get_config('topfd', 'skip_html_folder'):
-            topfd_command.append('--skip-html-folder')
-        
-        if self.args.get_config('topfd', 'disable_additional_feature_search'):
-            topfd_command.append('--disable-additional-feature-search')
-        
-        if self.args.get_config('topfd', 'disable_final_filtering'):
-            topfd_command.append('--disable-final-filtering')
-        
+        # Add input files
         for input_file in self.input_files:
             topfd_command.append(input_file)
 

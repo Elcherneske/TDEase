@@ -25,32 +25,29 @@ class SpectrumSumWorkflow(BaseWorkflow):
         script_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "Tools", "spectrum_sum.py")
 
         sum_spectrum_command = [python_path, script_path]
-        if self.args.get_config('spectrum_sum', 'tool'):
-            sum_spectrum_command.extend(["--tool", self.args.get_config('spectrum_sum', 'tool')])
+        
+        # Add all command line options with values
+        options = {
+            'tool': ('--tool', str),
+            'method': ('--method', str),
+            'block_size': ('--block-size', str),
+            'start_scan': ('--start-scan', str),
+            'end_scan': ('--end-scan', str),
+            'ms_level': ('--ms-level', str),
+            'rt_tolerance': ('--rt-tolerance', str),
+            'mz_tolerance': ('--mz-tolerance', str)
+        }
+        
+        # Add options with values
+        for key, (flag, converter) in options.items():
+            value = self.args.get_config('spectrum_sum', key)
+            if value:
+                sum_spectrum_command.extend([flag, converter(value)])
 
-        if self.args.get_config('spectrum_sum', 'method'):
-            sum_spectrum_command.extend(["--method", self.args.get_config('spectrum_sum', 'method')])
-        
-        if self.args.get_config('spectrum_sum', 'block_size'):
-            sum_spectrum_command.extend(["--block-size", self.args.get_config('spectrum_sum', 'block_size')])
-        
-        if self.args.get_config('spectrum_sum', 'start_scan'):
-            sum_spectrum_command.extend(["--start-scan", self.args.get_config('spectrum_sum', 'start_scan')])
-        
-        if self.args.get_config('spectrum_sum', 'end_scan'):
-            sum_spectrum_command.extend(["--end-scan", self.args.get_config('spectrum_sum', 'end_scan')])
-        
-        if self.args.get_config('spectrum_sum', 'ms_level'):
-            sum_spectrum_command.extend(["--ms-level", self.args.get_config('spectrum_sum', 'ms_level')])
-        
-        if self.args.get_config('spectrum_sum', 'rt_tolerance'):
-            sum_spectrum_command.extend(["--rt-tolerance", self.args.get_config('spectrum_sum', 'rt_tolerance')])
-        
-        if self.args.get_config('spectrum_sum', 'mz_tolerance'):
-            sum_spectrum_command.extend(["--mz-tolerance", self.args.get_config('spectrum_sum', 'mz_tolerance')])
-        
+        # Add required input file
         sum_spectrum_command.extend(["--input", input_file])
-
+        
+        # Add output directory if specified
         if self.output_dir:
             sum_spectrum_command.extend(["--output-dir", self.output_dir])
         
