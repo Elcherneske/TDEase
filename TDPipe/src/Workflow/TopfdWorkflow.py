@@ -4,65 +4,56 @@ class TopfdWorkflow(BaseWorkflow):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        self.input_files = args.get_ms_file_path()
+        self.input_files = args.get_config('msfile', None)
 
     def prepare_workflow(self):
-        # 示例：设置OnlyTopfd的命令序列
-        self.commands = [
-            self._topfd_command()
-        ] 
+        self.commands = []
+        command = self._topfd_command()
+        if command:
+            self.commands.append(command)
 
     def _topfd_command(self):
-        topfd_command = [self.args.tool_paths['topfd']]
-        if self.args.get_topfd_config_option('activation'):
-            topfd_command.append('--activation')
-            topfd_command.append(self.args.get_topfd_config_option('activation'))
+        if not self.args.get_config('tools', 'topfd'):
+            self.log("TopFD path is empty, please check the configuration.")
+            return None
         
-        if self.args.get_topfd_config_option('max_charge'):
-            topfd_command.append('--max-charge')
-            topfd_command.append(str(self.args.get_topfd_config_option('max_charge')))
+        topfd_command = [self.args.get_config('tools', 'topfd')]
         
-        if self.args.get_topfd_config_option('max_mass'):
-            topfd_command.append('--max-mass')
-            topfd_command.append(str(self.args.get_topfd_config_option('max_mass')))
+        # Add all command line options based on configuration
+        options = {
+            'activation': ('--activation', str),
+            'max-charge': ('--max-charge', str),
+            'max-mass': ('--max-mass', str),
+            'mz-error': ('--mz-error', str),
+            'ms-one-sn-ratio': ('--ms-one-sn-ratio', str),
+            'ms-two-sn-ratio': ('--ms-two-sn-ratio', str),
+            'precursor-window': ('--precursor-window', str),
+            'ecscore-cutoff': ('--ecscore-cutoff', str),
+            'min-scan-number': ('--min-scan-number', str),
+            'thread-number': ('--thread-number', str)
+        }
         
-        if self.args.get_topfd_config_option('mz_error'):
-            topfd_command.append('--mz-error')
-            topfd_command.append(str(self.args.get_topfd_config_option('mz_error')))
+        # Add options with values
+        for key, (flag, converter) in options.items():
+            value = self.args.get_config('topfd', key)
+            if value:
+                topfd_command.extend([flag, converter(value)])
         
-        if self.args.get_topfd_config_option('ms1_sn'):
-            topfd_command.append('--ms-one-sn-ratio')
-            topfd_command.append(str(self.args.get_topfd_config_option('ms1_sn')))
+        # Add boolean flags
+        bool_flags = {
+            'missing-level-one': '--missing-level-one',
+            'msdeconv': '--msdeconv',
+            'single-scan-noise': '--single-scan-noise',
+            'disable-additional-feature-search': '--disable-additional-feature-search',
+            'disable-final-filtering': '--disable-final-filtering',
+            'skip-html-folder': '--skip-html-folder'
+        }
         
-        if self.args.get_topfd_config_option('ms2_sn'):
-            topfd_command.append('--ms-two-sn-ratio')
-            topfd_command.append(str(self.args.get_topfd_config_option('ms2_sn')))
+        for key, flag in bool_flags.items():
+            if self.args.get_config('topfd', key):
+                topfd_command.append(flag)
         
-        if self.args.get_topfd_config_option('precursor_window'):
-            topfd_command.append('--precursor-window')
-            topfd_command.append(str(self.args.get_topfd_config_option('precursor_window')))
-        
-        if self.args.get_topfd_config_option('ecscore_cutoff'):
-            topfd_command.append('--ecscore-cutoff')
-            topfd_command.append(str(self.args.get_topfd_config_option('ecscore_cutoff')))
-        
-        if self.args.get_topfd_config_option('min_scan_number'):
-            topfd_command.append('--min-scan-number')
-            topfd_command.append(str(self.args.get_topfd_config_option('min_scan_number')))
-        
-        if self.args.get_topfd_config_option('thread_number'):
-            topfd_command.append('--thread-number')
-            topfd_command.append(str(self.args.get_topfd_config_option('thread_number')))
-        
-        if self.args.get_topfd_config_option('skip_html_folder'):
-            topfd_command.append('--skip-html-folder')
-        
-        if self.args.get_topfd_config_option('disable_additional_feature_search'):
-            topfd_command.append('--disable-additional-feature-search')
-        
-        if self.args.get_topfd_config_option('disable_final_filtering'):
-            topfd_command.append('--disable-final-filtering')
-        
+        # Add input files
         for input_file in self.input_files:
             topfd_command.append(input_file)
 

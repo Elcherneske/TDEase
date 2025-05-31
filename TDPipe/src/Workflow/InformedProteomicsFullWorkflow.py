@@ -1,10 +1,11 @@
 from .BaseWorkflow import BaseWorkflow
 
-class PbfgenPromexWorkflow(BaseWorkflow):
+class InformedProteomicsFullWorkflow(BaseWorkflow):
     def __init__(self, args):
         super().__init__()
         self.args = args
         self.input_files = args.get_config('msfile', None)
+        self.fasta_file = args.get_config('fasta', None)
         self.output_dir = args.get_config('output', None)
 
     def prepare_workflow(self):
@@ -22,6 +23,10 @@ class PbfgenPromexWorkflow(BaseWorkflow):
             command = self._promex_command(pbf_file)
             if command:
                 self.commands.append(command)
+        
+        command = self._mspathfinder_command(pbf_files)
+        if command:
+            self.commands.append(command)
     
     def _pbfgen_command(self, input_file):
         if not self.args.get_config('tools', 'pbfgen'):
@@ -100,3 +105,70 @@ class PbfgenPromexWorkflow(BaseWorkflow):
             promex_command.extend(['-o', self.args.get_config('output', None)])
 
         return promex_command
+    
+    def _mspathfinder_command(self, input_files: list[str]):
+        if not self.args.get_config('tools', 'mspathfinder'):
+            self.log("MSPathFinder path is empty, please check the configuration.")
+            return None
+        
+        mspathfinder_command = [self.args.get_config('tools', 'mspathfinder')]
+        
+        # Required input file
+        mspathfinder_command.append('-i')
+        for file in input_files:
+            mspathfinder_command.append(file)
+
+        # Required database file
+        mspathfinder_command.append('-d')
+        mspathfinder_command.append(self.fasta_file)
+
+        if self.args.get_config('output', None):
+            mspathfinder_command.append('-o')
+            mspathfinder_command.append(self.args.get_config('output', None))
+
+        # Add all command line options with values
+        options = {
+            'ic': ('-ic', str),
+            'TagSearch': ('-TagSearch', lambda x: str(x).lower()),
+            'MemMatches': ('-MemMatches', str),
+            'NumMatchesPerSpec': ('-n', str),
+            'ModificationFile': ('-mod', str),
+            'PMTolerance': ('-t', str),
+            'FragTolerance': ('-f', str),
+            'MinLength': ('-MinLength', str),
+            'MaxLength': ('-MaxLength', str),
+            'MinCharge': ('-MinCharge', str),
+            'MaxCharge': ('-MaxCharge', str),
+            'MinFragCharge': ('-MinFragCharge', str),
+            'MaxFragCharge': ('-MaxFragCharge', str),
+            'MinMass': ('-MinMass', str),
+            'MaxMass': ('-MaxMass', str),
+            'FeatureFile': ('-feature', str),
+            'ThreadCount': ('-threads', str),
+            'ActivationMethod': ('-act', str),
+            'ScansFile': ('-scansFile', str),
+            'ParamFile': ('-ParamFile', str)
+        }
+        
+        # Add options with values
+        for key, (flag, converter) in options.items():
+            value = self.args.get_config('mspathfinder', key)
+            if value is not None:
+                mspathfinder_command.extend([flag, converter(value)])
+
+        # Add boolean flags
+        bool_flags = {
+            'IncludeDecoys': '-IncludeDecoys',
+            'overwrite': '-overwrite',
+            'UseFlipScoring': '-flip'
+        }
+        
+        for key, flag in bool_flags.items():
+            if self.args.get_config('mspathfinder', key):
+                mspathfinder_command.append(flag)
+
+        # Special handling for TDA mode
+        if self.args.get_config('mspathfinder', 'tda') is not None:
+            mspathfinder_command.extend(['-tda', '1' if self.args.get_config('mspathfinder', 'tda') else '0'])
+
+        return mspathfinder_command

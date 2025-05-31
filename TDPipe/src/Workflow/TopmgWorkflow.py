@@ -4,109 +4,69 @@ class TopmgWorkflow(BaseWorkflow):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        self.input_files = args.get_ms_file_path()
-        self.fasta_file = args.get_fasta_path()
+        self.input_files = args.get_config('msfile', None)
+        self.fasta_file = args.get_config('fasta', None)
 
     def prepare_workflow(self):
-        self.commands = [
-            self._topmg_command()
-        ]
+        self.commands = []
+        command = self._topmg_command()
+        if command:
+            self.commands.append(command)
     
     def _topmg_command(self):
-        topmg_command = [self.args.tool_paths['topmg']]
+        if not self.args.get_config('tools', 'topmg'):
+            self.log("TopMG路径为空，请检查配置。")
+            return None
         
-        if self.args.get_topmg_config_option('activation'):
-            topmg_command.append('--activation')
-            topmg_command.append(self.args.get_topmg_config_option('activation'))
+        topmg_command = [self.args.get_config('tools', 'topmg')]
         
-        if self.args.get_topmg_config_option('fixed-mod'):
-            topmg_command.append('--fixed-mod')
-            topmg_command.append(self.args.get_topmg_config_option('fixed-mod'))
-
-        if self.args.get_topmg_config_option('n-terminal-form'):
-            topmg_command.append('--n-terminal-form')
-            topmg_command.append(self.args.get_topmg_config_option('n-terminal-form'))
-
-        if self.args.get_topmg_config_option('decoy'):
-            topmg_command.append('--decoy')
-
-        if self.args.get_topmg_config_option('mass-error-tolerance'):
-            topmg_command.append('--mass-error-tolerance')
-            topmg_command.append(str(self.args.get_topmg_config_option('mass-error-tolerance')))
-
-        if self.args.get_topmg_config_option('proteoform-error-tolerance'):
-            topmg_command.append('--proteoform-error-tolerance')
-            topmg_command.append(str(self.args.get_topmg_config_option('proteoform-error-tolerance')))
-
-        if self.args.get_topmg_config_option('max-shift'):
-            topmg_command.append('--max-shift')
-            topmg_command.append(str(self.args.get_topmg_config_option('max-shift')))
-
-        if self.args.get_topmg_config_option('spectrum-cutoff-type'):
-            topmg_command.append('--spectrum-cutoff-type')
-            topmg_command.append(self.args.get_topmg_config_option('spectrum-cutoff-type'))
+        # Add all command line options with values
+        options = {
+            'activation': ('--activation', str),
+            'fixed-mod': ('--fixed-mod', str),
+            'n-terminal-form': ('--n-terminal-form', str),
+            'mass-error-tolerance': ('--mass-error-tolerance', str),
+            'proteoform-error-tolerance': ('--proteoform-error-tolerance', str),
+            'max-shift': ('--max-shift', str),
+            'spectrum-cutoff-type': ('--spectrum-cutoff-type', str),
+            'spectrum-cutoff-value': ('--spectrum-cutoff-value', str),
+            'proteoform-cutoff-type': ('--proteoform-cutoff-type', str),
+            'proteoform-cutoff-value': ('--proteoform-cutoff-value', str),
+            'mod-file-name': ('--mod-file-name', str),
+            'thread-number': ('--thread-number', str),
+            'proteo-graph-gap': ('--proteo-graph-gap', str),
+            'var-ptm-in-gap': ('--var-ptm-in-gap', str),
+            'var-ptm': ('--var-ptm', str),
+            'num-shift': ('--num-shift', str),
+            'combined-file-name': ('--combined-file-name', str)
+        }
         
-        if self.args.get_topmg_config_option('spectrum-cutoff-value'):
-            topmg_command.append('--spectrum-cutoff-value')
-            topmg_command.append(str(self.args.get_topmg_config_option('spectrum-cutoff-value')))
-
-        if self.args.get_topmg_config_option('proteoform-cutoff-type'):
-            topmg_command.append('--proteoform-cutoff-type')
-            topmg_command.append(self.args.get_topmg_config_option('proteoform-cutoff-type'))
-
-        if self.args.get_topmg_config_option('proteoform-cutoff-value'):
-            topmg_command.append('--proteoform-cutoff-value')
-            topmg_command.append(str(self.args.get_topmg_config_option('proteoform-cutoff-value')))
-
-        if self.args.get_topmg_config_option('mod-file-name'):
-            topmg_command.append('--mod-file-name')
-            topmg_command.append(self.args.get_topmg_config_option('mod-file-name'))
-
-        if self.args.get_topmg_config_option('thread-number'):
-            topmg_command.append('--thread-number')
-            topmg_command.append(str(self.args.get_topmg_config_option('thread-number')))
-
-        if self.args.get_topmg_config_option('no-topfd-feature'):
-            topmg_command.append('--no-topfd-feature')
-
-        if self.args.get_topmg_config_option('proteo-graph-gap'):
-            topmg_command.append('--proteo-graph-gap')
-            topmg_command.append(str(self.args.get_topmg_config_option('proteo-graph-gap')))
-
-        if self.args.get_topmg_config_option('var-ptm-in-gap'):
-            topmg_command.append('--var-ptm-in-gap')
-            topmg_command.append(str(self.args.get_topmg_config_option('var-ptm-in-gap')))
-
-        if self.args.get_topmg_config_option('use-asf-diagonal'):
-            topmg_command.append('--use-asf-diagonal')
-
-        if self.args.get_topmg_config_option('var-ptm'):
-            topmg_command.append('--var-ptm')
-            topmg_command.append(str(self.args.get_topmg_config_option('var-ptm')))
-
-        if self.args.get_topmg_config_option('num-shift'):
-            topmg_command.append('--num-shift')
-            topmg_command.append(str(self.args.get_topmg_config_option('num-shift')))
-
-        if self.args.get_topmg_config_option('whole-protein-only'):
-            topmg_command.append('--whole-protein-only')
-
-        if self.args.get_topmg_config_option('combined-file-name'):
-            topmg_command.append('--combined-file-name')
-            topmg_command.append(self.args.get_topmg_config_option('combined-file-name'))
-
-        if self.args.get_topmg_config_option('keep-temp-files'):
-            topmg_command.append('--keep-temp-files')
-
-        if self.args.get_topmg_config_option('keep-decoy-ids'):
-            topmg_command.append('--keep-decoy-ids')
-
-        if self.args.get_topmg_config_option('skip-html-folder'):
-            topmg_command.append('--skip-html-folder')
-
+        # Add options with values
+        for key, (flag, converter) in options.items():
+            value = self.args.get_config('topmg', key)
+            if value:
+                topmg_command.extend([flag, converter(value)])
+        
+        # Add boolean flags
+        bool_flags = {
+            'decoy': '--decoy',
+            'no-topfd-feature': '--no-topfd-feature',
+            'use-asf-diagonal': '--use-asf-diagonal',
+            'whole-protein-only': '--whole-protein-only',
+            'keep-temp-files': '--keep-temp-files',
+            'keep-decoy-ids': '--keep-decoy-ids',
+            'skip-html-folder': '--skip-html-folder'
+        }
+        
+        for key, flag in bool_flags.items():
+            if self.args.get_config('topmg', key):
+                topmg_command.append(flag)
+        
+        # Add fasta file
         topmg_command.append(self.fasta_file)
-
-        for file in self.input_files:
-            topmg_command.append(file)
+        
+        # Add input files
+        for input_file in self.input_files:
+            topmg_command.append(input_file)
 
         return topmg_command

@@ -1,18 +1,36 @@
 from .BaseWorkflow import BaseWorkflow
 
-class MSConvertWorkflow(BaseWorkflow):
+class ToppicSuitWorkflow(BaseWorkflow):
     def __init__(self, args):
         super().__init__()
         self.args = args
         self.input_files = args.get_config('msfile', None)
+        self.fasta_file = args.get_config('fasta', None)
+        self.output_dir = args.get_config('output', None)
 
     def prepare_workflow(self):
         self.commands = []
-        command = self._msconvert_command()
+        command = self._msconvert_command(self.input_files)
         if command:
             self.commands.append(command)
 
-    def _msconvert_command(self):
+        mzml_files = []
+        for input_file in self.input_files:
+            mzml_files.append(f"{self.output_dir}/{input_file.split('/')[-1].rsplit('.', 1)[0]}.mzML")
+            
+        command = self._topfd_command(mzml_files)
+        if command:
+            self.commands.append(command)
+
+        msalign_files = []
+        for mzml_file in mzml_files:
+            msalign_files.append(f"{self.output_dir}/{mzml_file.split('/')[-1].rsplit('.', 1)[0]}_ms2.msalign")
+
+        command = self._toppic_command(msalign_files)
+        if command:
+            self.commands.append(command)
+    
+    def _msconvert_command(self, input_files):
         if not self.args.get_config('tools', 'msconvert'):
             self.log("MSConvert path is empty, please check the configuration.")
             return None
@@ -52,9 +70,9 @@ class MSConvertWorkflow(BaseWorkflow):
         else:
             msconvert_command.append('--inten32')
 
-        if self.args.get_config('output', None):
+        if self.args.output_dir:
             msconvert_command.append('-o')
-            msconvert_command.append(self.args.get_config('output', None))
+            msconvert_command.append(self.args.output_dir)
 
         # 处理peakPicking
         if self.args.get_config('msconvert', 'peak_picking_enabled'):
@@ -229,23 +247,119 @@ class MSConvertWorkflow(BaseWorkflow):
         msconvert_command.append('--filter')
         msconvert_command.append('"titleMaker <RunId>.<ScanNumber>.<ScanNumber>.<ChargeState> File:"""^<SourcePath^>""", NativeID:"""^<Id^>""""')
 
-        for input_file in self.input_files:
+        for input_file in input_files:
             msconvert_command.append(input_file)
 
         return msconvert_command
     
+    def _topfd_command(self, input_files: list[str]):
+        if not self.args.get_config('tools', 'topfd'):
+            self.log("TopFD path is empty, please check the configuration.")
+            return None
+        
+        topfd_command = [self.args.get_config('tools', 'topfd')]
+        
+        # Add all command line options based on configuration
+        options = {
+            'activation': ('--activation', str),
+            'max-charge': ('--max-charge', str),
+            'max-mass': ('--max-mass', str),
+            'mz-error': ('--mz-error', str),
+            'ms-one-sn-ratio': ('--ms-one-sn-ratio', str),
+            'ms-two-sn-ratio': ('--ms-two-sn-ratio', str),
+            'precursor-window': ('--precursor-window', str),
+            'ecscore-cutoff': ('--ecscore-cutoff', str),
+            'min-scan-number': ('--min-scan-number', str),
+            'thread-number': ('--thread-number', str)
+        }
+        
+        # Add options with values
+        for key, (flag, converter) in options.items():
+            value = self.args.get_config('topfd', key)
+            if value:
+                topfd_command.extend([flag, converter(value)])
+        
+        # Add boolean flags
+        bool_flags = {
+            'missing-level-one': '--missing-level-one',
+            'msdeconv': '--msdeconv',
+            'single-scan-noise': '--single-scan-noise',
+            'disable-additional-feature-search': '--disable-additional-feature-search',
+            'disable-final-filtering': '--disable-final-filtering',
+            'skip-html-folder': '--skip-html-folder'
+        }
+        
+        for key, flag in bool_flags.items():
+            if self.args.get_config('topfd', key):
+                topfd_command.append(flag)
+        
+        # Add input files
+        for input_file in input_files:
+            topfd_command.append(input_file)
+
+        return topfd_command
+
+    def _toppic_command(self, input_files: list[str]):
+        if not self.args.get_config('tools', 'toppic'):
+            self.log("TopPIC path is empty, please check the configuration.")
+            return None
+        
+        toppic_command = [self.args.get_config('tools', 'toppic')]
+        
+        # Add all command line options with values
+        options = {
+            'activation': ('--activation', str),
+            'fixed-mod': ('--fixed-mod', str),
+            'n-terminal-form': ('--n-terminal-form', str),
+            'num-shift': ('--num-shift', str),
+            'min-shift': ('--min-shift', str),
+            'max-shift': ('--max-shift', str),
+            'variable-ptm-num': ('--variable-ptm-num', str),
+            'variable-ptm-file-name': ('--variable-ptm-file-name', str),
+            'mass-error-tolerance': ('--mass-error-tolerance', str),
+            'proteoform-error-tolerance': ('--proteoform-error-tolerance', str),
+            'spectrum-cutoff-type': ('--spectrum-cutoff-type', str),
+            'spectrum-cutoff-value': ('--spectrum-cutoff-value', str),
+            'proteoform-cutoff-type': ('--proteoform-cutoff-type', str),
+            'proteoform-cutoff-value': ('--proteoform-cutoff-value', str),
+            'local-ptm-file-name': ('--local-ptm-file-name', str),
+            'miscore-threshold': ('--miscore-threshold', str),
+            'thread-number': ('--thread-number', str),
+            'num-combined-spectra': ('--num-combined-spectra', str),
+            'combined-file-name': ('--combined-file-name', str)
+        }
+        
+        # Add options with values
+        for key, (flag, converter) in options.items():
+            value = self.args.get_config('toppic', key)
+            if value and (key != 'fixed-mod' or value != 'Custom'):
+                toppic_command.extend([flag, converter(value)])
+        
+        # Add boolean flags
+        bool_flags = {
+            'decoy': '--decoy',
+            'approximate-spectra': '--approximate-spectra',
+            'lookup-table': '--lookup-table',
+            'no-topfd-feature': '--no-topfd-feature',
+            'keep-temp-files': '--keep-temp-files',
+            'keep-decoy-ids': '--keep-decoy-ids',
+            'skip-html-folder': '--skip-html-folder'
+        }
+        
+        for key, flag in bool_flags.items():
+            if self.args.get_config('toppic', key):
+                toppic_command.append(flag)
+        
+        # Add fasta file
+        toppic_command.append(self.fasta_file)
+        
+        # Add input files
+        for input_file in input_files:
+            toppic_command.append(input_file)
+
+        return toppic_command
+
+
 if __name__ == '__main__':
-    import subprocess
-    command = ['C:\\Users\\Elcher\\AppData\\Local\\Apps\\ProteoWizard\\msconvert.exe', '--zlib', '--mzML', '--mz32', '--inten32', '-o', 'D:/', '--filter', '"peakPicking vendor msLevel=1-"', '--filter', '"titleMaker <RunId>.<ScanNumber>.<ScanNumber>.<ChargeState> File:"""^<SourcePath^>""", NativeID:"""^<Id^>""""', 'D:/BaiduNetdiskDownload/20250113-2-400ng-HistoneQC-2.raw']
-    process = subprocess.Popen(
-        command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        universal_newlines=True
-    )
-    while True:
-        output = process.stdout.readline()
-        if output == '' and process.poll() is not None:
-            break
-        if output:
-            print(output.strip())
+    pass
+

@@ -1,16 +1,14 @@
 import sys
 
 def check_libraries():
-    required_libs = ['numpy', 'pyopenms']
+    required_libs = ['numpy', 'pyopenms', 'streamlit', 'plotly', 'matplotlib']
     missing = []
     
     for lib in required_libs:
         try:
             __import__(lib)
-            print(f"{lib} is installed")
         except ImportError:
             missing.append(lib)
-            print(f"{lib} is missing")
     
     if missing:
         print(f"Missing libraries: {', '.join(missing)}")

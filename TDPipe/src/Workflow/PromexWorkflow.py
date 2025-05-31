@@ -4,79 +4,60 @@ class PromexWorkflow(BaseWorkflow):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        self.input_files = args.get_ms_file_path()
+        self.input_files = args.get_config('msfile', None)
 
     def prepare_workflow(self):
         self.commands = []
         for input_file in self.input_files:
-            self.commands.append(self._promex_command(input_file))
+            command = self._promex_command(input_file)
+            if command:
+                self.commands.append(command)
     
     def _promex_command(self, input_file):
-        promex_command = [self.args.tool_paths['promex']]
+        if not self.args.get_config('tools', 'promex'):
+            self.log("Promex path is empty, please check the configuration.")
+            return None
         
-        # Required input file
-        promex_command.append('-i')
-        promex_command.append(input_file)
+        promex_command = [self.args.get_config('tools', 'promex')]
         
-        if self.args.get_output_dir():
-            promex_command.append('-o')
-            promex_command.append(self.args.get_output_dir())
-
-        # Optional charge range
-        if self.args.get_promex_config_option('MinCharge'):
-            promex_command.append('-MinCharge')
-            promex_command.append(str(self.args.get_promex_config_option('MinCharge')))
+        # Add all command line options with values
+        options = {
+            'MinCharge': ('-MinCharge', str),
+            'MaxCharge': ('-MaxCharge', str),
+            'MinMass': ('-MinMass', str),
+            'MaxMass': ('-MaxMass', str),
+            'MaxThreads': ('-MaxThreads', str),
+            'BinResPPM': ('-BinResPPM', str),
+            'ScoreThreshold': ('-ScoreThreshold', str),
+            'ms1ft': ('-ms1ft', str),
+            'ParamFile': ('-ParamFile', str)
+        }
         
-        if self.args.get_promex_config_option('MaxCharge'):
-            promex_command.append('-MaxCharge')
-            promex_command.append(str(self.args.get_promex_config_option('MaxCharge')))
-
-        # Optional mass range
-        if self.args.get_promex_config_option('MinMass'):
-            promex_command.append('-MinMass')
-            promex_command.append(str(self.args.get_promex_config_option('MinMass')))
+        # Add options with values
+        for key, (flag, converter) in options.items():
+            value = self.args.get_config('promex', key)
+            if value:
+                promex_command.extend([flag, converter(value)])
         
-        if self.args.get_promex_config_option('MaxMass'):
-            promex_command.append('-MaxMass')
-            promex_command.append(str(self.args.get_promex_config_option('MaxMass')))
+        # Add boolean flags
+        bool_flags = {
+            'Score': '-Score',
+            'csv': '-csv'
+        }
+        
+        for key, flag in bool_flags.items():
+            if self.args.get_config('promex', key):
+                promex_command.append(flag)
+        
+        # Special handling for FeatureMap
+        if self.args.get_config('promex', 'FeatureMap') is not None and not self.args.get_config('promex', 'FeatureMap'):
+            promex_command.append('-FeatureMap:false')
 
-        # Optional feature map
-        if self.args.get_promex_config_option('FeatureMap') is not None:
-            promex_command.append('-FeatureMap')
-            if not self.args.get_promex_config_option('FeatureMap'):
-                promex_command.append('false')
-
-        # Optional score output
-        if self.args.get_promex_config_option('Score'):
-            promex_command.append('-Score')
-
-        # Optional thread count
-        if self.args.get_promex_config_option('MaxThreads'):
-            promex_command.append('-MaxThreads')
-            promex_command.append(str(self.args.get_promex_config_option('MaxThreads')))
-
-        # Optional CSV output
-        if self.args.get_promex_config_option('Csv'):
-            promex_command.append('-Csv')
-
-        # Optional bin resolution
-        if self.args.get_promex_config_option('BinResPPM'):
-            promex_command.append('-BinResPPM')
-            promex_command.append(str(self.args.get_promex_config_option('BinResPPM')))
-
-        # Optional score threshold
-        if self.args.get_promex_config_option('ScoreThreshold'):
-            promex_command.append('-ScoreThreshold')
-            promex_command.append(str(self.args.get_promex_config_option('ScoreThreshold')))
-
-        # Optional ms1ft file
-        if self.args.get_promex_config_option('ms1ft'):
-            promex_command.append('-ms1ft')
-            promex_command.append(self.args.get_promex_config_option('ms1ft'))
-
-        # Optional parameter file
-        if self.args.get_promex_config_option('ParamFile'):
-            promex_command.append('-ParamFile')
-            promex_command.append(self.args.get_promex_config_option('ParamFile'))
+        # Add required input file
+        promex_command.extend(['-i', input_file])
+        
+        # Add output directory if specified
+        if self.args.get_config('output', None):
+            promex_command.extend(['-o', self.args.get_config('output', None)])
 
         return promex_command
