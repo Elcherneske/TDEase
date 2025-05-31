@@ -9,22 +9,21 @@ from . import UserGuide
 
 from ..Utils.FileUtils import FileUtils
 from ..Utils.ServerUtils import ServerControl
-
 import json
-        
+
 
 class ReportPage():
     def __init__(self):
         self.language = st.session_state.get('language', "en")
         self.selected_file = None
         self.df = None
-        self._load_locale()  # 新增本地化加载方法
+        self._load_locale() 
 
     def _load_locale(self):
         """加载本地化文本"""
         try:
             pages_dir = os.path.dirname(os.path.abspath(__file__))
-            locale_dir = os.path.join(pages_dir, '..','..', 'locales')  # 根据实际情况调整'..'的数量
+            locale_dir = os.path.join(pages_dir, '..','..', 'i18n')  
             locale_path = os.path.join(locale_dir, f"{self.language}.json")
             with open(locale_path, "r", encoding="utf-8") as f:
                 self.locale = json.loads(f.read())
@@ -47,7 +46,7 @@ class ReportPage():
     def _sidebar(self):
         """整合所有侧边栏组件"""
         with st.sidebar:
-            # 主样本选择
+            # 主文件夹选择
             if st.session_state.get('user_select_file'):
                 file_suffix = os.path.splitext(st.session_state['user_select_file'])[1]
                 if file_suffix not in [".pptx", ".docx"]:
@@ -61,15 +60,13 @@ class ReportPage():
                         key="sample_selection"
                     )
 
-
     def show_report_page(self):
         # 首先直接启动toppic服务（保持不变）
         self.html_path = FileUtils.get_html_report_path(st.session_state['user_select_file'],st.session_state['sample'])
         ServerControl.start_report_server(self.html_path)
 
         st.title("TDvis")
-        # 缓存特征文件列表（新增）
-        @st.cache_data
+        
         def get_feature_files():
             return [
                 FileUtils.get_file_path("_ms1.feature",selected_path=st.session_state['user_select_file'],sample_name=st.session_state['sample']),

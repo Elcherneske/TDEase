@@ -9,6 +9,7 @@ class SqliteUtils:
         self.conn = None  # 新增事务连接属性
         self.cursor = None  # 新增事务游标属性
 
+    # 修改：移除 cursor.closed 和 conn.closed 检查，直接关闭连接
     def _connect(self):
         """建立数据库连接"""
         try:
@@ -18,21 +19,7 @@ class SqliteUtils:
         except Exception as e:
             raise Exception(f"数据库连接失败: {str(e)}")
 
-    # 新增事务管理方法
-    def begin_transaction(self):
-        self.conn, self.cursor = self._connect()
-        
-    def commit_transaction(self):
-        self.conn.commit()
-        self.cursor.close()
-        self.conn.close()
-        
-    def rollback_transaction(self):
-        self.conn.rollback()
-        self.cursor.close()
-        self.conn.close()
-
-    # 新增非查询执行方法（兼容PostgreUtils接口）
+    # 修改：execute_non_query 方法的 finally 块
     def execute_non_query(self, query: str, params=None) -> int:
         try:
             conn, cursor = self._connect()
@@ -43,14 +30,12 @@ class SqliteUtils:
             print(f"Query failed: {str(e)}")
             return 0
         finally:
-            cursor.close()
-            conn.close()
+            if cursor:  # 直接关闭，无需检查 closed
+                cursor.close()
+            if conn:  # 直接关闭，无需检查 closed
+                conn.close()
 
-    # 新增参数占位符方法（PostgreSQL用%s，SQLite用?）
-    def param_placeholder(self) -> str:
-        return "?"
-
-    # 修改delete_data方法，支持参数化查询
+    # 修改：delete_data 方法的 finally 块
     def delete_data(self, table_name: str, condition: str, params: tuple = None) -> None:
         """
         删除数据（兼容PostgreUtils接口）
@@ -71,25 +56,24 @@ class SqliteUtils:
             conn.rollback()
             raise Exception(f"删除数据失败: {str(e)}")
         finally:
-            if cursor and not cursor.closed:
+            if cursor:  # 直接关闭
                 cursor.close()
-            if conn and not conn.closed:
+            if conn:  # 直接关闭
                 conn.close()
 
-    # 修改select_data_to_df方法，支持参数传递
+    # 修改：select_data_to_df 方法（显式管理连接生命周期）
     def select_data_to_df(
         self,
         table_name: str,
         columns: List[str] = ["*"],
         condition: str = None,
-        params: tuple = None,  # 新增参数
+        params: tuple = None,
         limit: int = None,
         offset: int = None
     ) -> pd.DataFrame:
-        """
-        查询数据并转换为DataFrame（兼容PostgreUtils接口）
-        """
+        """查询数据并返回DataFrame"""
         try:
+            conn, cursor = self._connect()
             columns_str = ", ".join(columns)
             select_query = f"SELECT {columns_str} FROM {table_name}"
             if condition:
@@ -98,12 +82,17 @@ class SqliteUtils:
                 select_query += f" LIMIT {limit}"
             if offset:
                 select_query += f" OFFSET {offset}"
-            # 使用pandas的params参数支持参数化查询
-            return pd.read_sql_query(select_query, self._connect()[0], params=params)
+                
+            return pd.read_sql_query(select_query, conn, params=params)
         except Exception as e:
             raise Exception(f"查询数据失败: {str(e)}")
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
 
-    # 新增update_data方法（兼容PostgreUtils接口）
+    # 修改：update_data 方法的 finally 块
     def update_data(self, table_name: str, set_clause: str, condition: str, params: tuple) -> None:
         """
         更新数据（兼容PostgreUtils接口）
@@ -121,9 +110,121 @@ class SqliteUtils:
             self.rollback_transaction()
             raise Exception(f"更新数据失败: {str(e)}")
         finally:
-            if self.cursor and not self.cursor.closed:
+            if self.cursor:  # 直接关闭
                 self.cursor.close()
-            if self.conn and not self.conn.closed:
+            if self.conn:  # 直接关闭
                 self.conn.close()
 
-    # 其他原有方法（如create_table、insert_data等）保持不变...
+    # 修改：execute_query 方法的 finally 块
+    def execute_query(self, query: str, params: tuple = None) -> pd.DataFrame:
+        """
+        执行查询并返回DataFrame结果
+        :param query: SQL查询语句
+        :param params: 参数元组（可选）
+        :return: 包含查询结果的DataFrame
+        """
+        conn, cursor = None, None  # 初始化连接变量
+        try:
+            conn, cursor = self._connect()
+            # 使用pandas读取查询结果，支持参数化查询
+            return pd.read_sql_query(query, conn, params=params)
+        except Exception as e:
+            raise Exception(f"执行查询失败: {str(e)}")
+        finally:
+            if cursor:  # 直接关闭
+                cursor.close()
+            if conn:  # 直接关闭
+                conn.close()
+
+    # 新增创建表方法（兼容PostgreUtils接口）
+    def create_table(self, table_name: str, columns: List[str]) -> None:
+        """创建表时进行类型映射"""
+        # PostgreSQL到SQLite的类型映射
+        type_mapping = {
+            'SERIAL': 'INTEGER',
+            'VARCHAR': 'TEXT',
+            'JSONB': 'TEXT',
+            'TEXT': 'TEXT'
+        }
+        
+        # 转换列定义
+        mapped_columns = []
+        for col in columns:
+            for pg_type, sqlite_type in type_mapping.items():
+                col = col.replace(pg_type, sqlite_type)
+            mapped_columns.append(col)
+            
+        columns_str = ", ".join(mapped_columns)
+        create_query = f"CREATE TABLE IF NOT EXISTS {table_name} ({columns_str})"
+        self.execute_non_query(create_query)  # 复用非查询执行方法
+    
+    # 新增插入数据方法（兼容PostgreUtils接口）
+    def insert_data(self, table_name: str, columns: List[str], values: List[Any]) -> int:
+        """
+        插入数据（参数化查询防止SQL注入）
+        :param table_name: 表名
+        :param columns: 列名列表（如 ["name", "age"]）
+        :param values: 对应列的值列表（长度需与columns一致）
+        :return: 成功插入的行数（通常为1）
+        """
+        columns_str = ", ".join(columns)
+        placeholders = ", ".join([self.param_placeholder()] * len(columns))  # 使用?占位符
+        insert_query = f"INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})"
+        return self.execute_non_query(insert_query, tuple(values))  # 传递参数元组
+
+    # 新增批量插入数据方法
+    def insert_batch_data(self, table_name: str, columns: List[str], values: List[Tuple[Any]]) -> None:
+        """批量插入数据"""
+        try:
+            conn, cursor = self._connect()
+            columns_str = ", ".join(columns)
+            placeholders = ", ".join(["?" * len(columns)])
+            insert_query = f"INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})"
+            cursor.executemany(insert_query, values)
+            conn.commit()
+        except Exception as e:
+            if conn:
+                conn.rollback()
+            raise Exception(f"批量插入数据失败: {str(e)}")
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+
+    # Add parameter placeholder method (PostgreSQL uses %s, SQLite uses ?)
+    def param_placeholder(self) -> str:
+        """返回SQLite的参数占位符"""
+        return "?"
+    
+    def json_array_append(self, column: str, path: str, value: str) -> str:
+        """SQLite的JSON数组追加实现"""
+        return f"json_insert({column}, '$[#]', {value})"
+
+    def json_extract(self, column: str, path: str) -> str:
+        """SQLite的JSON提取实现"""
+        return f"json_extract({column}, '{path}')"
+
+    def begin_transaction(self):
+        """开始事务"""
+        self.conn, self.cursor = self._connect()
+        self.conn.isolation_level = None  # 允许手动事务控制
+        self.cursor.execute('BEGIN')
+
+    def commit_transaction(self):
+        """提交事务"""
+        if self.conn:
+            self.cursor.execute('COMMIT')
+            self.cursor.close()
+            self.conn.close()
+            self.conn = None
+            self.cursor = None
+
+    def rollback_transaction(self):
+        """回滚事务"""
+        if self.conn:
+            self.cursor.execute('ROLLBACK')
+            self.cursor.close()
+            self.conn.close()
+            self.conn = None
+            self.cursor = None

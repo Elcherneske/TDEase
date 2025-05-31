@@ -4,8 +4,7 @@ from src.UserPages.UserPage import UserPage
 from src.Utils.Args import Args
 from src.DBUtils.DBUtils import DBUtils
 from src.Pages.ReportPage import ReportPage 
-import threading
-import time
+
 
 
 class LoginPage():

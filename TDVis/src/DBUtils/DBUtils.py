@@ -15,7 +15,10 @@ class DBUtils:
         else:
             raise ValueError(f"不支持的数据库模式: {db_mode}")
         
-        # 新增：初始化表结构（自动创建缺失表）
+        # 新增：统一获取当前数据库的占位符（? 或 %s）
+        self.placeholder = self.db.param_placeholder()
+        
+        # 初始化表结构（自动创建缺失表）
         self._initialize_tables()
 
     @staticmethod
@@ -37,7 +40,7 @@ class DBUtils:
         return self.db.select_data_to_df(
             "users",
             columns=["*"],
-            condition="username = %s AND password = %s",
+            condition=f"username = {self.placeholder} AND password = {self.placeholder}",  # 使用统一占位符属性
             params=(username, encoded_password)
         )
 
@@ -90,7 +93,8 @@ class DBUtils:
         """删除多个用户"""
         try:
             self.db.begin_transaction()
-            placeholders = ','.join([self.db.param_placeholder()] * len(usernames))
+            # 使用统一占位符属性生成IN子句占位符
+            placeholders = ','.join([self.placeholder] * len(usernames))
             query = f"DELETE FROM users WHERE username IN ({placeholders})"
             affected_rows = self.db.execute_non_query(query, tuple(usernames))
             
@@ -208,10 +212,8 @@ class DBUtils:
         try:
             # Convert list to JSON string
             file_addresses_json = json.dumps(file_addresses)
-            
             # Build update query
             query = "UPDATE users SET file_addresses = %s WHERE username = %s"
-            
             # Execute query
             self.db.execute_non_query(query, (file_addresses_json, username))
             return True
@@ -238,26 +240,46 @@ class DBUtils:
             return f"json_insert({column}, '$[#]', {placeholder})"
         else:
             raise ValueError("Unsupported database type")
-
+        
+        
     def _initialize_tables(self):
         """自动初始化缺失的业务表（如users表）"""
-        # 定义需要初始化的表及默认列结构
         required_tables = {
             "users": [
-                "id INTEGER PRIMARY KEY AUTOINCREMENT",  # SQLite自增，PostgreSQL会自动转换为SERIAL
+                "id INTEGER PRIMARY KEY AUTOINCREMENT",
                 "username VARCHAR(100) UNIQUE NOT NULL",
                 "password VARCHAR(100) NOT NULL",
                 "role VARCHAR(50) NOT NULL",
-                "file_addresses TEXT DEFAULT '[]'"  # 存储JSON数组
+                "file_addresses TEXT DEFAULT '[]'"
             ]
         }
 
         for table_name, columns in required_tables.items():
-            # 检测表是否存在
             if not self._table_exists(table_name):
-                # 自动创建表
                 self.db.create_table(table_name, columns)
                 print(f"自动创建表 {table_name} 成功")
+
+                if table_name == "users":
+                    admin_username = "admin"
+                    admin_password = "123456"
+                    admin_role = "admin"
+
+                    # 使用统一占位符属性构造查询条件
+                    admin_exists = self.db.select_data_to_df(
+                        "users",
+                        columns=["username"],
+                        condition=f"username = {self.placeholder}",  # 使用统一占位符属性
+                        params=(admin_username,)
+                    ).empty
+
+                    if admin_exists:
+                        encoded_password = self.encode_password(admin_password)
+                        self.db.insert_data(
+                            "users",
+                            columns=["username", "password", "role", "file_addresses"],
+                            values=(admin_username, encoded_password, admin_role, '[]')
+                        )
+                        print(f"插入默认管理员 {admin_username} 成功")
 
     def _table_exists(self, table_name: str) -> bool:
         """检测指定表是否存在"""
@@ -270,25 +292,16 @@ class DBUtils:
                     AND table_name = %s
                 )
             """
-            placeholder = self.db.param_placeholder()  # 获取PostgreSQL的%s占位符
+            # 修正：使用iloc[row, column]格式避免位置索引警告
+            result_df = self.db.execute_query(check_sql, (table_name,))
+            return result_df.iloc[0, 0]  # 改为行列联合索引
         elif isinstance(self.db, SqliteUtils):
             # SQLite检测表存在SQL（查询sqlite_master）
             check_sql = """
                 SELECT name FROM sqlite_master 
                 WHERE type='table' AND name = ?
             """
-            placeholder = self.db.param_placeholder()  # 获取SQLite的?占位符
+            # 改为使用通用查询方法
+            return not self.db.execute_query(check_sql, (table_name,)).empty
         else:
             raise ValueError("Unsupported database type")
-
-        # 执行检测查询
-        result = self.db.select_data_to_df(
-            sql=check_sql,
-            params=(table_name,)
-        )
-
-        # 判断结果：PostgreSQL返回(True/False)，SQLite返回(表名/None)
-        if isinstance(self.db, PostgreUtils):
-            return result.iloc[0][0] if not result.empty else False
-        else:
-            return not result.empty

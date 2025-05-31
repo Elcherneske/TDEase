@@ -4,14 +4,14 @@
     "mainTitle": "报告界面",
     "selectFolder": "📁 选择报告文件夹",
     "report_tab_label": "概要",
-    "feature_tab_label": "特征图谱",
-    "toppic_tab_label": "二级质谱信息",
+    "feature_tab_label": "主界面",
+    "toppic_tab_label": "鉴定结构",
     "guide_tab_label": "使用指南",
     
     
     "_comment_feature_page": "特征图页面组件",
-    "integration_caption": ":material/star: **积分图谱**: 展示选中范围内的局部质谱图像",  
-    "ptms_caption": ":material/star: **PTMs匹配**: 展示选中时间范围内的PTMs匹配结果", 
+    "integration_caption": "⭐ 积分图谱: 展示选中范围内的局部质谱图像",  
+    "ptms_caption": "⭐PTMs匹配: 展示选中时间范围内的PTMs匹配结果", 
 
     "heatmap_settings_expander": "**热力图基本设置**",
     "intensity_process": "强度处理方式",  
@@ -30,7 +30,7 @@
  
 
     "ms1_featuremap_header": "**MS1特征图谱**",
-    "featuremap_caption": ":material/star: **特征图谱**: 展示特征的时间和质量分布！请在图中框选以进行下一步！",
+    "featuremap_caption": "⭐ 特征图谱: 展示特征的时间和质量分布！请在图中框选以进行下一步！",
     "heatmap_xaxis_title": "保留时间范围",
     "heatmap_yaxis_title": "质量 (Da)",
     "heatmap_title": "特征热力图",

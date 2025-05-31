@@ -1,9 +1,4 @@
 from src import *
-from src.utils import *
-from src.Pages import *
-from src.DBUtils import *
-from src.UserPages import *
-from src.AdminPages import *
 
 # Add missing imports at the top
 import sys
@@ -20,18 +15,24 @@ logging.basicConfig(
 )
 
 def resolve_path(path):
-    resolved_path = os.path.abspath(os.path.join(os.getcwd(), path))
+    # 添加打包环境下的路径处理
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.getcwd()
+    resolved_path = os.path.abspath(os.path.join(base_path, path))
     return resolved_path
-
 
 if __name__ == "__main__":
     try:
+        sys.path.insert(0, os.getcwd())
+        # 关键修改：显式关闭开发模式（或移除端口参数）
         sys.argv = [
             "streamlit",
             "run",
             resolve_path("MainPage.py"),
-            "--server.headless=false",
-            "--logger.level=debug"  # 开启Streamlit调试日志
+            "--logger.level=debug",
+            "--global.developmentMode=false"  # 显式关闭开发模式
         ]
         exit_code = stcli.main()
         if exit_code != 0:
