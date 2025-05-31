@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 import subprocess
 from abc import abstractmethod
-from wakepy import keep
+from wakepy import keep 
 
 class BaseWorkflow(QThread):
     # 定义信号用于向GUI发送输出
@@ -20,14 +20,15 @@ class BaseWorkflow(QThread):
         
     def run(self):         
         self.prepare_workflow()
-        with keep.running():
+        with keep.presenting():
             for command in self.commands:
                 self.log("command: " + ' '.join(command))
                 self.process = subprocess.Popen(
                     command,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
-                    text=True
+                    text=True,
+                    bufsize=1
                 )
                 while True:
                     output = self.process.stdout.readline()
