@@ -1,0 +1,5 @@
+streamlit>=1.28.0   # 使用精确版本替代 >=
+pandas>=2.2.0       # 当前最新 2.x 版本
+plotly>=5.18.0      # 兼容性版本 (~=5.18.0 表示 5.18.x)
+streamlit-aggrid>=0.3
+numpy>=1.24.0

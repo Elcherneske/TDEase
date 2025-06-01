@@ -1,7 +1,8 @@
 import os
 import streamlit as st
 import pandas as pd
-
+from .Args import Args
+from ..DBUtils import DBUtils
 
 class FileUtils:
     """_summary_
@@ -31,8 +32,6 @@ class FileUtils:
         resolved_path = os.path.join(project_root, input_path) if not os.path.isabs(input_path) else input_path
         return os.path.normpath(resolved_path)
     
-
-    
     @staticmethod
     def list_samples(selected_path=None):
 
@@ -40,12 +39,12 @@ class FileUtils:
 
         if not resolved_path or not os.path.exists(resolved_path):
             raise FileNotFoundError(f"路径不存在: {resolved_path}")
-            
+
         samples = []
-        # 修复3：遍历解析后的路径
         for filename in os.listdir(resolved_path):
             if filename.endswith("ms1.feature"):
-                sample_name = filename.split("_")[0]
+                last_underscore_idx = filename.rfind("_")
+                sample_name = filename[:last_underscore_idx] if last_underscore_idx != -1 else filename
                 samples.append(sample_name)
         return samples
 
@@ -53,33 +52,77 @@ class FileUtils:
     def get_html_report_path(selected_path=None, sample_name=None):
         # 添加路径解析
         resolved_path = FileUtils._resolve_path(selected_path or st.session_state.get('user_select_file'))
-        for filename in os.listdir(resolved_path):  # 使用解析后的路径
-            target_suffix = f"{sample_name}_html"
-            for filename in os.listdir(resolved_path):
-                if filename.endswith(target_suffix):
-                    return os.path.join(resolved_path, filename)
-            raise FileNotFoundError(f"未找到HTML报告文件: {target_suffix}")
+        # 新增路径存在性检查
+        if not resolved_path or not os.path.exists(resolved_path):
+            raise FileNotFoundError(f"路径不存在: {resolved_path}")
+            
+        target_folder = f"{sample_name}_html"  # 名称构造逻辑
+        # 遍历目录并检查是否为文件夹
+        for entry in os.scandir(resolved_path):
+            if entry.is_dir() and entry.name == target_folder:  # 精确匹配文件夹名称
+                return os.path.join(resolved_path, entry.name)
+        st.write(f"[DEBUG] 搜索路径: {resolved_path}")
+        st.write(f"[DEBUG] 期待文件夹: {target_folder}")
+        st.write(f"[DEBUG] 实际存在的文件夹: {[e.name for e in os.scandir(resolved_path) if e.is_dir()]}")
+        # raise FileNotFoundError(f"未找到HTML报告文件夹: {target_folder}")
 
 
     @staticmethod
     def get_file_path(suffix, selected_path=None, sample_name=None):
         # 确保使用解析后的路径
         resolved_path = FileUtils._resolve_path(selected_path or st.session_state.get('user_select_file'))
-        for filename in os.listdir(resolved_path):  # 使用解析后的路径
-            """
-            获取指定后缀文件的路径
-            针对于最开始选中的文件夹,也就是一级文件夹!
-            Args:
-                suffix (str): 指定的文件后缀，如 ".feature"
-                selected_path (str): 指定的文件夹路径，默认为 None，使用 session_state 中的值
-                sample_name (str): 指定的样品名称，默认为 None，使用 session_state 中的值
-            Returns:
-                str: 找到的文件路径
-            """
-            target_suffix = f"{sample_name}{suffix}"
-            for filename in os.listdir(resolved_path):
-                if filename.endswith(target_suffix):
-                    return os.path.join(resolved_path, filename)
-            raise FileNotFoundError(f"未找到指定后缀文件: {target_suffix}")
+        # 新增路径校验
+        if not resolved_path or not os.path.exists(resolved_path):
+            raise FileNotFoundError(f"路径不存在: {resolved_path}")
 
+        target_suffix = f"{sample_name}{suffix}"
+        # 修复嵌套循环问题
+        for filename in os.listdir(resolved_path):
+            if filename.endswith(target_suffix):
+                return os.path.join(resolved_path, filename)
+        raise FileNotFoundError(f"未找到指定后缀文件: {target_suffix}")
+
+
+#  用户管理查询代码
+    @staticmethod
+    def query_files(username=None):
+        """
+        通用文件**地址**查询方法
+        是为数据库操作
+        :param username: 指定用户名时查询单个用户,None时查询所有用户
+        :return: 包含(用户名, 文件名)的DataFrame
+        """
+        args = Args()  
+        db_utils = DBUtils(args)  # 显式调用类名
+
+        if username:
+            file_addresses = db_utils.get_file_addresses(username)
+            return pd.DataFrame([
+                {"用户名": username, "文件名": os.path.normpath(f)}
+                for f in file_addresses
+            ])
+
+        # 处理全部用户查询（管理员模式）
+        all_files = []
+        users = db_utils.query_users("", 0, 0)  # 获取所有用户
+        for _, row in users.iterrows():
+            file_addresses = db_utils.get_file_addresses(row['username'])
+            all_files.extend([
+                {"用户名": row['username'], "文件名": os.path.normpath(f)}
+                for f in file_addresses
+            ])
+        return pd.DataFrame(all_files)
+
+    @staticmethod  
+    def query_user_files(username):
+        """
+        获取指定用户的文件列表
+        设计数据库操作
+        :param username: 当前登录用户名
+        :return: 包含文件名的DataFrame(列名为file_name)
+        """
+        args = Args()  
+        db_utils = DBUtils(args) 
+        file_addresses = db_utils.get_file_addresses(username)
+        return pd.DataFrame({'file_name': [os.path.normpath(f) for f in file_addresses]})
 
