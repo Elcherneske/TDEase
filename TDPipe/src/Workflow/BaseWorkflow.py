@@ -9,9 +9,10 @@ class BaseWorkflow(QThread):
 
     def __init__(self):
         super().__init__()
-        self.commands = []
         self.process = None
-        self.keep_awake = None
+        self.commands = []
+        self.check_fns = []
+        self.gap_nums = []
 
     @abstractmethod
     def prepare_workflow(self):
@@ -21,21 +22,28 @@ class BaseWorkflow(QThread):
     def run(self):         
         self.prepare_workflow()
         with keep.presenting():
-            for command in self.commands:
+            for command, check_fn, gap_num in zip(self.commands, self.check_fns, self.gap_nums):
                 self.log("command: " + ' '.join(command))
                 self.process = subprocess.Popen(
                     command,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
                     text=True,
-                    bufsize=1
+                    bufsize=1,
+                    shell=False
                 )
+
+                repeat_num = 0
                 while True:
                     output = self.process.stdout.readline()
                     if output == '' and self.process.poll() is not None:
                         break
                     if output:
-                        self.log(output)
+                        if check_fn == None or not check_fn(output) or repeat_num >= gap_num:
+                            self.log(output.strip())
+                            repeat_num = 0
+                        else:
+                            repeat_num += 1
                 
                 # 等待子进程结束
                 self.process.wait()
@@ -47,36 +55,4 @@ class BaseWorkflow(QThread):
         self.output_received.emit(text)
 
 if __name__ == '__main__':
-    import sys
-    from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QVBoxLayout, QWidget
-
-    class MainWindow(QMainWindow):
-        def __init__(self):
-            super().__init__()
-            self.setWindowTitle("输出窗口")
-            self.setGeometry(100, 100, 600, 400)
-
-            self.text_edit = QTextEdit(self)
-            self.text_edit.setReadOnly(True)
-
-            layout = QVBoxLayout()
-            layout.addWidget(self.text_edit)
-
-            container = QWidget()
-            container.setLayout(layout)
-            self.setCentralWidget(container)
-
-        def print_output(self, output):
-            self.text_edit.append(f"收到的输出: {output}")
-
-    app = QApplication(sys.argv)
-    window = MainWindow()
-
-    command = ["python", "test.py"]
-    worker = BaseWorkflow()
-    worker.commands = [command]
-    worker.output_received.connect(window.print_output)
-    worker.start()
-
-    window.show()
-    sys.exit(app.exec_())
+    pass

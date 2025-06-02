@@ -9,9 +9,13 @@ class TopmgWorkflow(BaseWorkflow):
 
     def prepare_workflow(self):
         self.commands = []
+        self.check_fns = []
+        self.gap_nums = []
         command = self._topmg_command()
         if command:
             self.commands.append(command)
+            self.check_fns.append(None)
+            self.gap_nums.append(0)
     
     def _topmg_command(self):
         if not self.args.get_config('tools', 'topmg'):

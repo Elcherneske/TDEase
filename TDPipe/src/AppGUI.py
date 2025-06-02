@@ -80,8 +80,6 @@ class AppGUI(QWidget):
             # 首先终止当前正在运行的子进程
             if hasattr(self.workflow, 'process') and self.workflow.process:
                 try:
-                    # 在Windows上，terminate()相当于SIGTERM
-                    # 在某些情况下可能不够强硬，所以我们先尝试温和的方式
                     self.workflow.commands = []
                     self.workflow.process.terminate()
                     
@@ -90,22 +88,20 @@ class AppGUI(QWidget):
                     
                     # 检查进程是否仍在运行
                     if self.workflow.process and self.workflow.process.poll() is None:
-                        # 如果进程仍在运行，使用kill()方法强制终止它
-                        # 这相当于向进程发送SIGKILL信号
                         self.workflow.process.kill()
-                        
-                    self.update_output("子进程已终止。")
+
+                    self.update_output("Process has been interrupted.")
                 except Exception as e:
-                    self.update_output(f"终止子进程时出错: {str(e)}")
+                    self.update_output(f"Error interrupting subprocess: {str(e)}")
             
             # 然后终止工作流线程
             try:
                 self.workflow.terminate()
-                self.update_output("工作流已停止。")
+                self.update_output("Workflow has been stopped.")
             except Exception as e:
-                self.update_output(f"停止工作流时出错: {str(e)}")
+                self.update_output(f"Error stopping workflow: {str(e)}")
                 
-            self.update_output("处理过程已被中断。")
+            self.update_output("Processing has been interrupted.")
         
     def _streamlit_process(self):
         # 如果进程尚未创建或已经终止，则创建并启动进程
@@ -113,10 +109,10 @@ class AppGUI(QWidget):
             dirname = os.path.dirname(os.path.dirname(__file__))
             filename = os.path.join(dirname, 'TDVis', 'MainPage.py')
             if not os.path.exists(filename):
-                QMessageBox.warning(self, "Warning", "Streamlit文件未找到。")
+                QMessageBox.warning(self, "Warning", "Streamlit file not found.")
                 return
             if not self.args.get_config('tools', 'python'):
-                QMessageBox.warning(self, "Warning", "Python路径未设置。")
+                QMessageBox.warning(self, "Warning", "Python path not set.")
                 return
             
             # 使用subprocess启动一个独立的进程运行streamlit

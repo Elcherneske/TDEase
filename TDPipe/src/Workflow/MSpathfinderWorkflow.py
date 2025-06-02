@@ -9,9 +9,13 @@ class MSpathfinderWorkflow(BaseWorkflow):
 
     def prepare_workflow(self):
         self.commands = []
+        self.check_fns = []
+        self.gap_nums = []
         command = self._mspathfinder_command()
         if command:
             self.commands.append(command)
+            self.check_fns.append(None)
+            self.gap_nums.append(0)
     
     def _mspathfinder_command(self):
         if not self.args.get_config('tools', 'mspathfinder'):

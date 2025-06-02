@@ -19,36 +19,33 @@ class RunTab(QWidget):
         self.log_file = None
         self.log_buffer = io.StringIO()
         self.buffer_size = 0
-        self.last_progress_line = ""
         self._init_ui()
 
-    def _is_progress_line(self, text):
-        if "Processing MS" in text and "finished" in text and "spectrum scan" in text:
-            return True
-        return False
+    # def _similar_line(self, text):
+    #     if self.last_text == text:
+    #         return True
+    #     # Extract numbers and remove them from both texts
+    #     numbers1 = [int(num) for num in re.findall(r'\d+', self.last_text)]
+    #     numbers2 = [int(num) for num in re.findall(r'\d+', text)]
+        
+    #     text1_no_numbers = re.sub(r'\d+', '', self.last_text).strip()
+    #     text2_no_numbers = re.sub(r'\d+', '', text).strip()
+        
+    #     # print(text1_no_numbers == text2_no_numbers, len(numbers1) == len(numbers2), '%' in text1_no_numbers, '%' in text2_no_numbers)
+    #     if (text1_no_numbers == text2_no_numbers and 
+    #         len(numbers1) == len(numbers2) and 
+    #         '%' in text1_no_numbers and 
+    #         '%' in text2_no_numbers):
+            
+    #         for n1, n2 in zip(numbers1, numbers2):
+    #             if n2 < n1:  # Check if second number is greater than first
+    #                 return False
+    #         return True
+    #     return False
 
     def update_output(self, text):
         # Check if current text is a progress update
-        if self._is_progress_line(text):
-            cursor = self.output_text.textCursor()
-            cursor.movePosition(cursor.End)
-            cursor.movePosition(cursor.PreviousCharacter)  # Move cursor one line up
-            cursor.movePosition(cursor.StartOfLine)
-            cursor.movePosition(cursor.PreviousCharacter)  # Move cursor one line up
-            cursor.movePosition(cursor.End, cursor.KeepAnchor)
-            last_line = cursor.selectedText()
-            # If the last line is also a progress update, replace it
-            if self._is_progress_line(last_line):
-                cursor.removeSelectedText()
-                # No need to move the cursor as it's already at the right position
-            else:
-                # Move cursor back to end for appending
-                cursor.movePosition(cursor.End)
-                self.output_text.setTextCursor(cursor)
-        
-        # Now append the text
-        self.output_text.append(text)
-        
+        self.output_text.append(text + "\n")
         # Handle log file writing
         if self.args.get_config('output', None):
             if self.log_file is None:
@@ -67,7 +64,7 @@ class RunTab(QWidget):
             if self.buffer_size >= 4096:
                 self._flush_log_buffer()
         else:
-            raise ValueError("Output directory is not set")
+            self.output_text.append("Output directory is not set")
         
         if text == "============Process finished============" or text == "Process has been interrupted.":
             self._flush_log_buffer()
@@ -90,33 +87,14 @@ class RunTab(QWidget):
         layout = QVBoxLayout()
         layout.setSpacing(20)
 
-        # style = """
-        #     QGroupBox {
-        #         background-color: #fafdff;
-        #         border: 2px solid #b0b8c1;
-        #         border-radius: 6px;
-        #         margin-top: 12px;
-        #         font-weight: bold;
-        #     }
-        #     QGroupBox::title {
-        #         color: #3a506b;
-        #         subcontrol-origin: margin;
-        #         left: 10px;
-        #         padding: 0 5px;
-        #     }
-        # """
         # Output
         output_group = self._create_output_group()
         # output_group.setStyleSheet(style)
         layout.addWidget(output_group)
         # Run
-        run_group = self._create_run_button()
+        run_group = self._create_run_buttons()
         # run_group.setStyleSheet(style)
         layout.addWidget(run_group)
-        # Stop
-        stop_group = self._create_stop_button()
-        # stop_group.setStyleSheet(style)
-        layout.addWidget(stop_group)
         # Vis
         vis_group = self._create_vis_button()
         # vis_group.setStyleSheet(style)
@@ -146,21 +124,24 @@ class RunTab(QWidget):
         group.setLayout(layout)
         return group
 
-    def _create_run_button(self):
+    def _create_run_buttons(self):
         group = QGroupBox("Run")
         layout = QHBoxLayout()
+        layout.setSpacing(20)
+
         self.run_btn = QPushButton("Run")
         layout.addWidget(QLabel("Run Button:"))
         layout.addWidget(self.run_btn)
-        group.setLayout(layout)
-        return group
 
-    def _create_stop_button(self):
-        group = QGroupBox("Stop")
-        layout = QHBoxLayout()
         self.stop_btn = QPushButton("Stop")
         layout.addWidget(QLabel("Stop Button:"))
         layout.addWidget(self.stop_btn)
+
+        self.clear_btn = QPushButton("Clear")
+        layout.addWidget(QLabel("Clear Button:"))
+        layout.addWidget(self.clear_btn)
+        self.clear_btn.clicked.connect(lambda: self.output_text.clear())
+
         group.setLayout(layout)
         return group
 

@@ -9,9 +9,18 @@ class ToppicWorkflow(BaseWorkflow):
 
     def prepare_workflow(self):
         self.commands = []
+        self.check_fns = []
+        self.gap_nums = []
+
         command = self._toppic_command()
         if command:
             self.commands.append(command)
+            self.check_fns.append(
+                lambda text: 
+                    ("unexpected shift filtering - processing" in text and "%" in text) or
+                    ("unexpected shift search - processing" in text)
+            )
+            self.gap_nums.append(20000)
     
     def _toppic_command(self):
         if not self.args.get_config('tools', 'toppic'):

@@ -10,9 +10,15 @@ class ToppicSuitWorkflow(BaseWorkflow):
 
     def prepare_workflow(self):
         self.commands = []
+        self.check_fns = []
+        self.gap_nums = []
+
+        # msconvert
         command = self._msconvert_command(self.input_files)
         if command:
             self.commands.append(command)
+            self.check_fns.append(None)
+            self.gap_nums.append(0)
 
         mzml_files = []
         for input_file in self.input_files:
@@ -21,6 +27,14 @@ class ToppicSuitWorkflow(BaseWorkflow):
         command = self._topfd_command(mzml_files)
         if command:
             self.commands.append(command)
+            self.check_fns.append(
+                lambda text: 
+                    ("Processing MS1 spectrum scan" in text and "%" in text) or
+                    ("Processing feature" in text and "%" in text) or
+                    ("Additional feature search MS1 spectrum scan" in text and "%" in text) or
+                    ("Processing MS/MS spectrum scan" in text and "%" in text)
+            )
+            self.gap_nums.append(500)
 
         msalign_files = []
         for mzml_file in mzml_files:
@@ -29,8 +43,14 @@ class ToppicSuitWorkflow(BaseWorkflow):
         command = self._toppic_command(msalign_files)
         if command:
             self.commands.append(command)
-    
-    def _msconvert_command(self, input_files):
+            self.check_fns.append(
+                lambda text: 
+                    ("unexpected shift filtering - processing" in text and "%" in text) or
+                    ("unexpected shift search - processing" in text)
+            )
+            self.gap_nums.append(20000)
+
+    def _msconvert_command(self, input_files: list[str]):
         if not self.args.get_config('tools', 'msconvert'):
             self.log("MSConvert path is empty, please check the configuration.")
             return None

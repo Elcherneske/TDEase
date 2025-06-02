@@ -8,10 +8,14 @@ class MSConvertWorkflow(BaseWorkflow):
 
     def prepare_workflow(self):
         self.commands = []
+        self.check_fns = []
+        self.gap_nums = []
         command = self._msconvert_command()
         if command:
             self.commands.append(command)
-
+            self.check_fns.append(None)
+            self.gap_nums.append(0)
+            
     def _msconvert_command(self):
         if not self.args.get_config('tools', 'msconvert'):
             self.log("MSConvert path is empty, please check the configuration.")

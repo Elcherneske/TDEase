@@ -8,9 +8,20 @@ class TopfdWorkflow(BaseWorkflow):
 
     def prepare_workflow(self):
         self.commands = []
+        self.check_fns = []
+        self.gap_nums = []  
+
         command = self._topfd_command()
         if command:
             self.commands.append(command)
+            self.check_fns.append(
+                lambda text: 
+                    ("Processing MS1 spectrum scan" in text and "%" in text) or
+                    ("Processing feature" in text and "%" in text) or
+                    ("Additional feature search MS1 spectrum scan" in text and "%" in text) or
+                    ("Processing MS/MS spectrum scan" in text and "%" in text)
+            )
+            self.gap_nums.append(500)
 
     def _topfd_command(self):
         if not self.args.get_config('tools', 'topfd'):

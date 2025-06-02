@@ -11,11 +11,15 @@ class SpectrumSumWorkflow(BaseWorkflow):
     
     def prepare_workflow(self):
         self.commands = []
+        self.check_fns = []
+        self.gap_nums = []
         for input_file in self.input_files:
             command = self._sum_spectrum_command(input_file)
             if command:
                 self.commands.append(command)
-    
+                self.check_fns.append(None)
+                self.gap_nums.append(0)
+
     def _sum_spectrum_command(self, input_file):
         python_path = self.args.get_config('tools', 'python')
         if not python_path:

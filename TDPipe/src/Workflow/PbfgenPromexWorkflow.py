@@ -9,10 +9,15 @@ class PbfgenPromexWorkflow(BaseWorkflow):
 
     def prepare_workflow(self):
         self.commands = []
+        self.check_fns = []
+        self.gap_nums = []
+
         for input_file in self.input_files:
             command = self._pbfgen_command(input_file)
             if command:
                 self.commands.append(command)
+                self.check_fns.append(None)
+                self.gap_nums.append(0)
 
         pbf_files = []
         for input_file in self.input_files:
@@ -22,6 +27,8 @@ class PbfgenPromexWorkflow(BaseWorkflow):
             command = self._promex_command(pbf_file)
             if command:
                 self.commands.append(command)
+                self.check_fns.append(None)
+                self.gap_nums.append(0)
     
     def _pbfgen_command(self, input_file):
         if not self.args.get_config('tools', 'pbfgen'):
