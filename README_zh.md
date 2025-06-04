@@ -61,21 +61,29 @@ http://{your_ip}:8501
 ### TDvis数据库配置
 如果您不需要用户认证,那么您可以忽略该部分
 
+#### SQlite
+
+数据库已经存在,并且已经配置,
+您只需要使用默认的用户名admin,密码123456进行登录即可
+
 #### postgreSQL
-TDvis_web版本默认使用[PostgreSQL](https://www.postgresql.org/)数据库进行用户管理
+
+我们推荐您使用[PostgreSQL](https://www.postgresql.org/)数据库进行生产环境下的
 
 PostgreSQL官方提供了详细的引导文档,因此您只需要按照引导下载pgAdmin进行初始的数据库创建
 
 而后在TDvis/DBUtils/dbconfig.toml中进行配置即可!
-
-#### SQlite
-
-数据库已经存在,您只需要将参数文件修改为如下格式,即可使用内置的SQlite先进行试验性的部署.
 ```
 [database]
-mode = "sqlite"
-dbname = "{your_path}/TDEase/TDVis/src/DBUtils/TDvis_sqlite3.db"
+mode = "postgresql"
+host = "localhost"
+port = 5432
+dbname = "postgres"
+user = "postgres"
+password = "yourpassword"
 ```
+
+
 
 ## 开发者:
 
@@ -85,9 +93,10 @@ dbname = "{your_path}/TDEase/TDVis/src/DBUtils/TDvis_sqlite3.db"
 
 
 1.  源代码下载
-'''pwsh
+
+```pwsh
 git clone https://github.com/Elcherneske/TDEase.git && cd TDease
-'''
+```
 
 2. 依赖安装
 
