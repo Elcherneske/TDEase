@@ -521,9 +521,12 @@ class Featuremap():
         if st.session_state.feature_state["compare_mode"]:
             fig.update_layout(
                 yaxis=dict(
-                    tickvals=np.arange(-100, 101, 20),
-                    ticktext=[f"{abs(x)}" for x in np.arange(-100, 101, 20)],
-                    range=[-110, 110]
+                    tickvals=np.arange(-100, 101, 10),  # 更细的y轴刻度
+                    ticktext=[f"{abs(x)}" for x in np.arange(-100, 101, 10)],
+                    range=[-110, 110],
+                    tickmode='auto',
+                    nticks=22,  # 期望的刻度数量
+                    autorange=True,  # 支持自动缩放
                 )
             )
             # 添加镜像分隔线
@@ -538,8 +541,11 @@ class Featuremap():
         else:
             fig.update_layout(
                 yaxis=dict(
-                    tickvals=np.arange(0, 101, 20),
-                    range=[0, 110]
+                    tickvals=np.arange(0, 101, 10),  # 更细的y轴刻度
+                    range=[0, 110],
+                    tickmode='auto',
+                    nticks=12,  # 期望的刻度数量
+                    autorange=True,  # 支持自动缩放
                 )
             )
 
@@ -625,7 +631,10 @@ class Featuremap():
                     'toImage', 
                     'lasso2d',
                     'plotlyLogo'
-                ]
+                ],
+                'scrollZoom': True,  # 支持滚轮缩放
+                'displayModeBar': True,
+                'modeBarButtonsToAdd': ['autoScale2d']  # 增加自动缩放按钮
             }
         )
         col1, col2 = st.columns([1, 3])

@@ -5,17 +5,43 @@ from .Args import Args
 from ..DBUtils import DBUtils
 
 class FileUtils:
-    """文件查询工具,用于统一维护文件查询路径"""
+    """_summary_
+    文件查询工具,用于统一维护文件查询路径
+    可以查询用户名下对应的文件地址
+    """
 
     @staticmethod
+    def _resolve_path(input_path):
+        """增强版路径解析，兼容本地和云端环境"""
+        if not input_path:
+            return None
+            
+        # 通过环境变量判断是否在Streamlit Cloud运行
+        is_cloud = os.environ.get("IS_STREAMLIT_CLOUD", "false").lower() == "true"
+        
+        # 获取项目根目录
+        if is_cloud:
+            # 云端环境固定路径
+            project_root = "/mount/src/tdvis_demo"
+        else:
+            # 本地环境动态计算
+            current_script_path = os.path.abspath(__file__)
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_script_path)))
+        
+        # 处理路径拼接
+        resolved_path = os.path.join(project_root, input_path) if not os.path.isabs(input_path) else input_path
+        return os.path.normpath(resolved_path)
+    
+    @staticmethod
     def list_samples(selected_path=None):
-        """列出指定目录下的样本"""
-        path = selected_path or st.session_state.get('user_select_file')
-        if not path or not os.path.exists(path):
-            raise FileNotFoundError(f"路径不存在: {path}")
+
+        resolved_path = FileUtils._resolve_path(selected_path or st.session_state.get('user_select_file'))
+
+        if not resolved_path or not os.path.exists(resolved_path):
+            raise FileNotFoundError(f"路径不存在: {resolved_path}")
 
         samples = []
-        for filename in os.listdir(path):
+        for filename in os.listdir(resolved_path):
             if filename.endswith("ms1.feature"):
                 last_underscore_idx = filename.rfind("_")
                 sample_name = filename[:last_underscore_idx] if last_underscore_idx != -1 else filename
@@ -24,28 +50,36 @@ class FileUtils:
 
     @staticmethod
     def get_html_report_path(selected_path=None, sample_name=None):
-        """获取HTML报告路径"""
-        path = selected_path or st.session_state.get('user_select_file')
-        if not path or not os.path.exists(path):
-            raise FileNotFoundError(f"路径不存在: {path}")
+        # 添加路径解析
+        resolved_path = FileUtils._resolve_path(selected_path or st.session_state.get('user_select_file'))
+        # 新增路径存在性检查
+        if not resolved_path or not os.path.exists(resolved_path):
+            raise FileNotFoundError(f"路径不存在: {resolved_path}")
             
-        target_folder = f"{sample_name}_html"
-        report_path = os.path.join(path, target_folder)
-        if os.path.isdir(report_path):
-            return report_path
-        return None
+        target_folder = f"{sample_name}_html"  # 名称构造逻辑
+        # 遍历目录并检查是否为文件夹
+        for entry in os.scandir(resolved_path):
+            if entry.is_dir() and entry.name == target_folder:  # 精确匹配文件夹名称
+                return os.path.join(resolved_path, entry.name)
+        st.write(f"[DEBUG] 搜索路径: {resolved_path}")
+        st.write(f"[DEBUG] 期待文件夹: {target_folder}")
+        st.write(f"[DEBUG] 实际存在的文件夹: {[e.name for e in os.scandir(resolved_path) if e.is_dir()]}")
+        # raise FileNotFoundError(f"未找到HTML报告文件夹: {target_folder}")
+
 
     @staticmethod
     def get_file_path(suffix, selected_path=None, sample_name=None):
-        """获取特定后缀的文件路径"""
-        path = selected_path or st.session_state.get('user_select_file')
-        if not path or not os.path.exists(path):
-            raise FileNotFoundError(f"路径不存在: {path}")
+        # 确保使用解析后的路径
+        resolved_path = FileUtils._resolve_path(selected_path or st.session_state.get('user_select_file'))
+        # 新增路径校验
+        if not resolved_path or not os.path.exists(resolved_path):
+            raise FileNotFoundError(f"路径不存在: {resolved_path}")
 
         target_suffix = f"{sample_name}{suffix}"
-        for filename in os.listdir(path):
+        # 修复嵌套循环问题
+        for filename in os.listdir(resolved_path):
             if filename.endswith(target_suffix):
-                return os.path.join(path, filename)
+                return os.path.join(resolved_path, filename)
         raise FileNotFoundError(f"未找到指定后缀文件: {target_suffix}")
 
 
