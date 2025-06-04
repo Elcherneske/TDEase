@@ -93,8 +93,7 @@ password = "yourpassword"
 
 
 1.  源代码下载
-
-```pwsh
+'''pwsh
 git clone https://github.com/Elcherneske/TDEase.git && cd TDease
 ```
 
