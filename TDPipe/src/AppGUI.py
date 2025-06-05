@@ -5,6 +5,7 @@ import subprocess
 import webbrowser
 from PyQt5.QtWidgets import (QWidget, QTabWidget, QHBoxLayout,
                              QApplication, QMessageBox)
+from PyQt5.QtCore import QThread, pyqtSignal
 from Args import Args
 from GUI.ToolsTab import ToolsTab
 from GUI import MSConvertConfigTab
@@ -15,14 +16,70 @@ from GUI import InformedProteomicsConfigTab
 from GUI import SpectrumProcessingTab
 from Workflow.WorkflowManager import WorkflowManager
 
+class StreamlitThread(QThread):
+    output_signal = pyqtSignal(str)
+    started_signal = pyqtSignal()
+    error_signal = pyqtSignal(str)
+
+    def __init__(self, python_path, streamlit_file):
+        super().__init__()
+        self.python_path = python_path
+        self.streamlit_file = streamlit_file
+        self.process = None
+
+    def run(self):
+        try:
+            self.output_signal.emit("Starting Streamlit server...\n")
+            
+            self.process = subprocess.Popen(
+                [self.python_path, "-m", "streamlit", "run", self.streamlit_file],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1,
+                universal_newlines=True
+            )
+
+            # 等待一小段时间让Streamlit启动
+            time.sleep(1)
+            
+            if self.process.poll() is None:  # 如果进程还在运行
+                self.output_signal.emit("Streamlit server started successfully.\n")
+                self.started_signal.emit()
+            else:
+                error = self.process.stderr.read()
+                self.error_signal.emit(f"Failed to start Streamlit server: {error}")
+
+            # 持续读取输出
+            while self.process.poll() is None:
+                output = self.process.stdout.readline()
+                if output:
+                    self.output_signal.emit(output.strip())
+                error = self.process.stderr.readline()
+                if error:
+                    self.output_signal.emit(f"Error: {error.strip()}")
+
+        except Exception as e:
+            self.error_signal.emit(f"Error starting Streamlit: {str(e)}")
+
+    def stop(self):
+        if self.process and self.process.poll() is None:
+            try:
+                self.process.terminate()
+                time.sleep(0.25)
+                if self.process.poll() is None:
+                    self.process.kill()
+                self.output_signal.emit("Streamlit server stopped.\n")
+            except Exception as e:
+                self.error_signal.emit(f"Error stopping Streamlit: {str(e)}")
+
 class AppGUI(QWidget):
     def __init__(self):
         super().__init__()
         self.args = Args()  # 创建Args实例
         self.tabs = None
         self.output_tab = None
-
-        self.streamlit_process = None  # 初始化streamlit进程变量
+        self.streamlit_thread = None
         self._init_ui()
     
     def _init_ui(self):
@@ -104,8 +161,8 @@ class AppGUI(QWidget):
             self.update_output("Processing has been interrupted.")
         
     def _streamlit_process(self):
-        # 如果进程尚未创建或已经终止，则创建并启动进程
-        if self.streamlit_process is None or self.streamlit_process.poll() is not None:
+        # 如果线程尚未创建或已经终止，则创建并启动线程
+        if self.streamlit_thread is None or not self.streamlit_thread.isRunning():
             dirname = os.path.dirname(os.path.dirname(__file__))
             filename = os.path.join(dirname, 'TDVis', 'MainPage.py')
             if not os.path.exists(filename):
@@ -115,27 +172,27 @@ class AppGUI(QWidget):
                 QMessageBox.warning(self, "Warning", "Python path not set.")
                 return
             
-            # 使用subprocess启动一个独立的进程运行streamlit
-            self.streamlit_process = subprocess.Popen(
-                [self.args.get_config('tools', 'python'), "-m", "streamlit", "run", filename],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
+            # 创建并启动Streamlit线程
+            self.streamlit_thread = StreamlitThread(
+                self.args.get_config('tools', 'python'),
+                filename
             )
-            # 等待一小段时间让Streamlit启动
-            time.sleep(1)
+            
+            # 连接信号
+            self.streamlit_thread.output_signal.connect(self.update_output)
+            self.streamlit_thread.error_signal.connect(lambda msg: QMessageBox.warning(self, "Error", msg))
+            self.streamlit_thread.started_signal.connect(lambda: webbrowser.open('http://localhost:8501'))
+            
+            # 启动线程
+            self.streamlit_thread.start()
         else:
-            # 打开默认浏览器访问streamlit页面
+            # 如果Streamlit已经在运行，直接打开浏览器
             webbrowser.open('http://localhost:8501')
     
     def closeEvent(self, event):
-        # 窗口关闭时终止streamlit进程
-        if self.streamlit_process and self.streamlit_process.poll() is None:
-            self.streamlit_process.terminate()
-            # 给进程一点时间来正常关闭
-            time.sleep(0.25)
-            # 如果进程仍在运行，强制终止
-            if self.streamlit_process.poll() is None:
-                self.streamlit_process.kill()
+        # 窗口关闭时终止streamlit线程
+        if self.streamlit_thread and self.streamlit_thread.isRunning():
+            self.streamlit_thread.stop()
+            self.streamlit_thread.wait()  # 等待线程结束
         event.accept()
         
