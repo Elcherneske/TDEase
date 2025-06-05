@@ -25,6 +25,13 @@ def main():
         "streamlit",
         "plotly",
         "pyopenms",
+        "pandas",
+        "psycopg2",
+        "polars",
+        "sqlalchemy",
+        "pymysql",
+        "scipy",
+        "pyteomics",
         # 在这里添加更多需要安装的包
     ]
     # packages = ["numpy", "plotly"]

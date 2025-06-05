@@ -1,13 +1,57 @@
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLabel, QVBoxLayout,
                             QHBoxLayout, QGroupBox, QLineEdit, QFileDialog,
-                            QMessageBox, QProgressDialog)
-from PyQt5.QtCore import QCoreApplication, Qt
+                            QMessageBox, QProgressDialog, QTextEdit)
+from PyQt5.QtCore import QCoreApplication, Qt, QThread, pyqtSignal
 from .Setting import ToolsSetting
 import os
 import subprocess
 import tempfile
 import sys
 from PyQt5.QtGui import QFont
+
+class InstallThread(QThread):
+    output_signal = pyqtSignal(str)
+    finished_signal = pyqtSignal(bool, str)  # success, message
+
+    def __init__(self, python_path, install_script_path):
+        super().__init__()
+        self.python_path = python_path
+        self.install_script_path = install_script_path
+
+    def run(self):
+        try:
+            self.output_signal.emit("Starting library installation...\n")
+            
+            process = subprocess.Popen(
+                [self.python_path, self.install_script_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1,
+                universal_newlines=True
+            )
+
+            while True:
+                output = process.stdout.readline()
+                if output == '' and process.poll() is not None:
+                    break
+                if output:
+                    self.output_signal.emit(output.strip())
+
+            return_code = process.poll()
+            
+            if return_code == 0:
+                self.output_signal.emit("\nInstallation completed successfully!")
+                self.finished_signal.emit(True, "All required libraries have been installed successfully!")
+            else:
+                error_output = process.stderr.read()
+                self.output_signal.emit(f"\nError during installation:\n{error_output}")
+                self.finished_signal.emit(False, f"Some libraries failed to install:\n{error_output}")
+
+        except Exception as e:
+            error_msg = f"\nAn error occurred: {str(e)}"
+            self.output_signal.emit(error_msg)
+            self.finished_signal.emit(False, f"An error occurred during installation: {str(e)}")
 
 class ToolsTab(QWidget):
     def __init__(self, args):
@@ -33,21 +77,6 @@ class ToolsTab(QWidget):
         ]
         for creator in group_creators:
             group = creator()
-            # group.setStyleSheet("""
-            #     QGroupBox {
-            #         background-color: #fafdff;
-            #         border: 2px solid #b0b8c1;
-            #         border-radius: 6px;
-            #         margin-top: 12px;
-            #         font-weight: bold;
-            #     }
-            #     QGroupBox::title {
-            #         color: #3a506b;
-            #         subcontrol-origin: margin;
-            #         left: 10px;
-            #         padding: 0 5px;
-            #     }
-            # """)
             layout.addWidget(group)
         layout.addStretch()
         self.setLayout(layout)
@@ -237,9 +266,6 @@ class ToolsTab(QWidget):
         browse_btn = QPushButton("browse")
         check_btn = QPushButton("check")
         install_btn = QPushButton("install libraries")
-        browse_btn.clicked.connect(lambda: self._browse_file(python_path))
-        check_btn.clicked.connect(lambda: self._check_python(python_path.text()))
-        install_btn.clicked.connect(lambda: self._install_libraries(python_path.text()))
         
         path_layout.addWidget(QLabel("Python path:"))
         path_layout.addWidget(python_path)
@@ -248,11 +274,25 @@ class ToolsTab(QWidget):
         path_layout.addWidget(install_btn)
         
         # Required libraries info
-        req_label = QLabel("Required libraries: numpy, pyopenms, streamlit, plotly, matplotlib")
-        req_label.setStyleSheet("color: #666; font-style: italic;")
+        req_label = QLabel("Required libraries: pandas, streamlit, pyopenms, numpy, psycopg2, polars, sqlalchemy, pymysql, scipy, plotly, pyteomics")
+        # req_label.setStyleSheet("color: #666; font-style: italic;")
+        cmd_label = QLabel("To install manually via cmd:\npip install pandas streamlit pyopenms numpy psycopg2 polars sqlalchemy pymysql scipy plotly pyteomics")
+        cmd_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
+        
+        # Output text box
+        output_text = QTextEdit()
+        output_text.setMaximumHeight(100)  # Set maximum height to about 3-5 lines
+        output_text.setReadOnly(True)
+        output_text.setVisible(False)  # Initially hidden
+
+        browse_btn.clicked.connect(lambda: self._browse_file(python_path))
+        check_btn.clicked.connect(lambda: self._check_python(python_path.text()))
+        install_btn.clicked.connect(lambda: self._install_libraries(python_path.text(), output_text))
         
         layout.addLayout(path_layout)
         layout.addWidget(req_label)
+        layout.addWidget(cmd_label)
+        layout.addWidget(output_text)
         
         group.setLayout(layout)
         return group
@@ -278,7 +318,7 @@ class ToolsTab(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
     
-    def _install_libraries(self, python_path):
+    def _install_libraries(self, python_path, output_text):
         if not python_path:
             QMessageBox.warning(self, "Warning", "Please select a Python path first.")
             return
@@ -288,54 +328,31 @@ class ToolsTab(QWidget):
             QMessageBox.warning(self, "Warning", "install_library.py not found.")
             return
 
-        try:
-            # Start the installation process
-            process = subprocess.Popen(
-                [python_path, install_script_path],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                bufsize=1,
-                universal_newlines=True
-            )
+        # Show the output text box
+        output_text.setVisible(True)
+        output_text.clear()
 
-            # Create a progress dialog
-            progress_dialog = QProgressDialog("Installing required libraries, don't close this window...", "Cancel", 0, 0, self)
-            progress_dialog.setWindowTitle("Installing Libraries")
-            progress_dialog.setWindowModality(Qt.WindowModal)
-            progress_dialog.setMinimumDuration(0)
-            progress_dialog.setCancelButton(None)  # Remove cancel button since we can't cancel pip install
-            progress_dialog.show()
+        # Create and start the installation thread
+        self.install_thread = InstallThread(python_path, install_script_path)
+        
+        # Connect signals
+        self.install_thread.output_signal.connect(lambda text: self._update_output(text, output_text))
+        self.install_thread.finished_signal.connect(self._handle_installation_finished)
+        
+        # Start the thread
+        self.install_thread.start()
 
-            # Read output in real-time
-            output_lines = []
-            while True:
-                output = process.stdout.readline()
-                if output == '' and process.poll() is not None:
-                    break
-                if output:
-                    output_lines.append(output.strip())
-                    # Keep only the last 10 lines
-                    if len(output_lines) > 10:
-                        output_lines = output_lines[-10:]
-                    progress_dialog.setLabelText("\n".join(output_lines))
-                    QCoreApplication.processEvents()
+    def _update_output(self, text, output_text):
+        output_text.append(text)
+        # Scroll to the bottom
+        output_text.verticalScrollBar().setValue(output_text.verticalScrollBar().maximum())
+        QCoreApplication.processEvents()
 
-            # Get the final result
-            return_code = process.poll()
-            
-            if return_code == 0:
-                progress_dialog.close()
-                QMessageBox.information(self, "Success", "All required libraries have been installed successfully!")
-            else:
-                error_output = process.stderr.read()
-                progress_dialog.close()
-                QMessageBox.warning(self, "Warning", f"Some libraries failed to install:\n{error_output}")
-
-        except Exception as e:
-            if 'progress_dialog' in locals():
-                progress_dialog.close()
-            QMessageBox.critical(self, "Error", f"An error occurred during installation: {str(e)}")
+    def _handle_installation_finished(self, success, message):
+        if success:
+            QMessageBox.information(self, "Success", message)
+        else:
+            QMessageBox.warning(self, "Warning", message)
     
     def _browse_file(self, line_edit):
         from PyQt5.QtWidgets import QFileDialog

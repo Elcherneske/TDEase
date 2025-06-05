@@ -1,7 +1,7 @@
 import sys
 
 def check_libraries():
-    required_libs = ['numpy', 'pyopenms', 'streamlit', 'plotly', 'matplotlib']
+    required_libs = ['numpy', 'pyopenms', 'streamlit', 'plotly', 'matplotlib', 'pandas', 'psycopg2', 'polars', 'sqlalchemy', 'pymysql', 'scipy', 'pyteomics']
     missing = []
     
     for lib in required_libs:
