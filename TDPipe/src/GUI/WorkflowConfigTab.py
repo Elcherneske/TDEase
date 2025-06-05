@@ -137,47 +137,74 @@ class WorkflowConfigTab(QWidget):
 2. TopFD: Performs feature detection and deconvolution
 3. TopPIC: Identifies proteoforms and performs database search
 
+Supported file formats: .raw, .mzML
+
 This workflow is suitable for comprehensive top-down proteomics analysis."""
         elif workflow_name == "Informed Proteomics Full":
             info_text = """Informed Proteomics Full workflow includes:
-2. PBFGen: Converts mzML to pbf format
-3. Promex: Performs feature detection
-4. MSPathFinderT: Performs database search
+1. PBFGen: Converts mzML to pbf format
+2. Promex: Performs feature detection
+3. MSPathFinderT: Performs database search
+
+Supported file formats: .raw, .mzML
 
 This workflow is optimized for high-throughput proteomics analysis."""
         elif workflow_name == "Informed Proteomics MS1-Only":
             info_text = """Informed Proteomics MS1-Only workflow includes:
-2. PBFGen: Converts mzML to pbf format
-3. Promex: Performs feature detection
+1. PBFGen: Converts mzML to pbf format
+2. Promex: Performs feature detection
+
+Supported file formats: .raw, .mzML
 
 This workflow is suitable for MS1-level analysis only."""
         elif workflow_name == "msconvert":
             info_text = """MSConvert is a tool for converting mass spectrometry data files between different formats.
-It supports various input formats and can convert them to mzML, mzXML, or other formats."""
+It supports various input formats and can convert them to mzML, mzXML, or other formats.
+
+Supported file formats: .raw, .mzML, .mzXML, .mzData, .mz5, .mzML.gz, .mzXML.gz, .mzData.gz, .mz5.gz
+"""
         elif workflow_name == "topfd":
             info_text = """TopFD is a tool for feature detection and deconvolution in top-down proteomics.
-It can detect features and deconvolute MS/MS spectra to identify proteoforms."""
+It can detect features and deconvolute MS/MS spectra to identify proteoforms.
+
+Supported file formats: .mzML
+"""
         elif workflow_name == "toppic":
             info_text = """TopPIC is a tool for proteoform identification in top-down proteomics.
-It can identify proteoforms and perform database search using MS/MS spectra."""
+It can identify proteoforms and perform database search using MS/MS spectra.
+
+Supported file formats: .msalign
+"""
         elif workflow_name == "topmg":
             info_text = """TopMG is a tool for proteoform identification in top-down proteomics.
 It can identify proteoforms and perform database search using MS/MS spectra."""
         elif workflow_name == "pbfgen":
             info_text = """PBFGen is a tool for converting mzML files to pbf format.
-It is used in the Informed Proteomics workflow."""
+It is used in the Informed Proteomics workflow.
+
+Supported file formats: .raw, .mzML
+"""
         elif workflow_name == "promex":
             info_text = """Promex is a tool for feature detection in mass spectrometry data.
-It can detect features in MS1 spectra and is used in the Informed Proteomics workflow."""
+It can detect features in MS1 spectra and is used in the Informed Proteomics workflow.
+
+Supported file formats: .pbf
+"""
         elif workflow_name == "mspathfinder":
             info_text = """MSPathFinder is a tool for database search in mass spectrometry data.
-It can identify peptides and proteins from MS/MS spectra."""
+It can identify peptides and proteins from MS/MS spectra.
+
+Supported file formats: .ms1ft
+"""
         elif workflow_name == "sum spectrum":
             info_text = """Spectrum Summing is a tool for combining multiple MS spectra.
 It can sum spectra based on different methods:
 1. Block Summing: Sums spectra in fixed-size blocks
 2. Range Summing: Sums spectra within a specified scan range
-3. Precursor Summing: Sums spectra based on precursor m/z and retention time"""
+3. Precursor Summing: Sums spectra based on precursor m/z and retention time
+
+Supported file formats: .mzML
+"""
         
         self.ui['info'].setText(info_text)
         self.args.set_config('workflow', None, workflow_name)

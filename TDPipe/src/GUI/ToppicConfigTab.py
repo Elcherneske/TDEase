@@ -301,7 +301,7 @@ class ToppicConfigTab(QWidget):
 
         # 添加 TopFD 相关参数
         grid.addWidget(QLabel("Maximum charge:"), row, 0)
-        max_charge = self._create_number_input('topfd', "max-charge", 2, 99, 30)
+        max_charge = self._create_number_input('topfd', "max-charge", 2, 99, 50)
         grid.addWidget(max_charge, row, 1)
         grid.addWidget(QLabel("MS1 S/N ratio:"), row, 2)
         ms1_sn = self._create_number_input('topfd', "ms-one-sn-ratio", 1, 1000, 3, double=True)
@@ -348,7 +348,7 @@ class ToppicConfigTab(QWidget):
         # 布尔参数及其标签
         bool_items = [
             ("Missing MS1 spectra", "missing-level-one", False),
-            ("Skip generation of HTML files", "skip-html-folder", False),
+            ("Generation of HTML files", "skip-html-folder", True),
             ("Use MS-Deconv score", "msdeconv", False),
             ("Disable final filtering", "disable-final-filtering", False),
             ("Disable additional feature search", "disable-additional-feature-search", False),
@@ -357,8 +357,12 @@ class ToppicConfigTab(QWidget):
         for idx, (label, key, default) in enumerate(bool_items):
             cb = QCheckBox(label)
             cb.setChecked(default)
-            self.args.set_config('topfd', key, default)
-            cb.stateChanged.connect(lambda state, k=key: (self.args.set_config('topfd', k, bool(state))))
+            if key == "skip-html-folder":
+                self.args.set_config('topfd', key, not default)
+                cb.stateChanged.connect(lambda state, k=key: (self.args.set_config('topfd', k, not bool(state))))
+            else:
+                self.args.set_config('topfd', key, default)
+                cb.stateChanged.connect(lambda state, k=key: (self.args.set_config('topfd', k, bool(state))))
             self.ui['topfd'][key] = cb
             additional_layout.addWidget(cb, idx // 3, idx % 3)
         additional_group.setLayout(additional_layout)
@@ -538,7 +542,7 @@ class ToppicConfigTab(QWidget):
         # 布尔参数及其标签
         bool_items = [
             ("Use decoy database", "decoy", False),
-            ("Skip generation of HTML files", "skip-html-folder", False),
+            ("Generation of HTML files", "skip-html-folder", True),
             ("Keep temporary files", "keep-temp-files", False),
             ("Keep decoy identifications", "keep-decoy-ids", False),
             ("Report only proteoforms from whole proteins", "whole-protein-only", False),
@@ -548,8 +552,12 @@ class ToppicConfigTab(QWidget):
         for idx, (label, key, default) in enumerate(bool_items):
             cb = QCheckBox(label)
             cb.setChecked(default)
-            self.args.set_config('topmg', key, default)
-            cb.stateChanged.connect(lambda state, key=key: self.args.set_config('topmg', key, bool(state)))
+            if key == "skip-html-folder":
+                self.args.set_config('topmg', key, not default)
+                cb.stateChanged.connect(lambda state, k=key: (self.args.set_config('topmg', k, not bool(state))))
+            else:
+                self.args.set_config('topmg', key, default)
+                cb.stateChanged.connect(lambda state, k=key: (self.args.set_config('topmg', k, bool(state))))
             self.ui['topmg'][key] = cb
             additional_layout.addWidget(cb, idx // 3, idx % 3)
         additional_group.setLayout(additional_layout)
@@ -729,7 +737,7 @@ class ToppicConfigTab(QWidget):
         bool_layout = QGridLayout()
         # 布尔参数及其标签
         bool_items = [
-            ("Skip Generation of HTML files", "skip-html-folder", False),
+            ("Generation of HTML files", "skip-html-folder", True),
             ("Lookup table for E-value computation", "lookup-table", False),
             ("Keep decoy identifications", "keep-decoy-ids", False),
             ("Keep intermediate files", "keep-temp-files", False),
@@ -737,8 +745,12 @@ class ToppicConfigTab(QWidget):
         for idx, (label, key, default) in enumerate(bool_items):
             cb = QCheckBox(label)
             cb.setChecked(default)
-            self.args.set_config('toppic', key, default)
-            cb.stateChanged.connect(lambda state, k=key: (self.args.set_config('toppic', k, bool(state))))
+            if key == "skip-html-folder":
+                self.args.set_config('toppic', key, not default)
+                cb.stateChanged.connect(lambda state, k=key: (self.args.set_config('toppic', k, not bool(state))))
+            else:
+                self.args.set_config('toppic', key, default)
+                cb.stateChanged.connect(lambda state, k=key: (self.args.set_config('toppic', k, bool(state))))
             self.ui['toppic'][key] = cb
             bool_layout.addWidget(cb, 0, idx)
         advanced_layout.addLayout(bool_layout, row, 0, 1, 4)
