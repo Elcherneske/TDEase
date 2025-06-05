@@ -29,7 +29,7 @@ class MainPage():
         with st.sidebar:
             lang = st.selectbox(
                 "🌐 Language / 语言",
-                ["zh", "en"],
+                ["zh", "en","ar","ru"],
             )
             # 保存用户选择的语言
             st.session_state["language"] = lang
