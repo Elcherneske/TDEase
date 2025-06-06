@@ -28,8 +28,6 @@ class PTMsCalculator:
                             try:
                                 calc_mass = float(formula)
                             except ValueError:
-                                # 不是数字则处理化学式
-                                # 支持加法和减法混合运算
                                 parts = []
                                 current_part = ""
                                 for char in formula:
@@ -61,6 +59,7 @@ class PTMsCalculator:
                     else:
                         st.session_state.pop(f"ptm_{i}_filled", None)  # 空值时清除标记
 
+
         if st.button("Generate PTMs Configuration", type="primary"):
             valid_ptms = []
             for i in range(5):
@@ -70,59 +69,77 @@ class PTMsCalculator:
                 
                 if st.session_state.get(f"ptm_{i}_filled"):
                     try:
-                        # 使用get方法安全获取值
                         formula = st.session_state.get(f"formula_{i}", "")
                         count = st.session_state.get(f"count_{i}", 0)
                         name = st.session_state.get(f"name_{i}", "")
-                        
-                        # 增加空值校验
-                        if not formula.strip() or not name.strip():
-                            st.error(f" The formula of {i+1} item cannot be empty.")
-                            return
-                        
 
-                        # 修改后的数字校验逻辑
-                        try:
-                            # 直接尝试转换为浮点数
-                            mass_per = float(formula)
-                            st.caption(f"Single Mass: {mass_per:.6f} Da")
-                        except ValueError:
-                            # 不是数字则按化学式计算（使用与输入验证相同的处理逻辑）
-                            parts = []
-                            current_part = ""
-                            for char in formula:
-                                if char in ('+', '-'):
-                                    if current_part:
-                                        parts.append(current_part)
-                                    parts.append(char)
-                                    current_part = ""
-                                else:
-                                    current_part += char
-                            if current_part:
-                                parts.append(current_part)
-                            
-                            mass_per = mass.calculate_mass(formula=parts[0])
-                            j = 1
-                            while j < len(parts):
-                                operator = parts[j]
-                                sub_formula = parts[j + 1]
-                                if operator == '+':
-                                    mass_per += mass.calculate_mass(formula=sub_formula)
-                                elif operator == '-':
-                                    mass_per -= mass.calculate_mass(formula=sub_formula)
-                                j += 2
-                            st.caption(f"Single Mass: {mass_per:.6f} Da")
-            # 新增代码块结束
+                        if not formula.strip() or not name.strip():
+                            st.error(f"第 {i+1} 项的公式或名称不能为空")
+                            return
+
+                        # 新的混合计算逻辑
+                        parts = []
+                        current = ""
+                        for c in formula:
+                            if c in ('+', '-'):
+                                if current:
+                                    parts.append(current.strip())
+                                parts.append(c)
+                                current = ""
+                            else:
+                                current += c
+                        if current:
+                            parts.append(current.strip())
+
+                        # 处理空表达式或无效格式
+                        if not parts:
+                            raise ValueError("空表达式")
+
+                        # 支持表达式以符号开头（如 -100+C6H12O6）
+                        if parts[0] in ('+', '-'):
+                            mass_per = 0.0
+                            index = 0
+                        else:
+                            # 处理第一个元素（可能是数字或化学式）
+                            try:
+                                mass_per = float(parts[0])
+                            except ValueError:
+                                mass_per = mass.calculate_mass(formula=parts[0])
+                            index = 1
+
+                        # 遍历剩余部分进行混合计算
+                        while index < len(parts):
+                            if index + 1 >= len(parts):
+                                raise ValueError("不完整的表达式")
+
+                            operator = parts[index]
+                            element = parts[index + 1]
+
+                            try:
+                                value = float(element)
+                            except ValueError:
+                                value = mass.calculate_mass(formula=element)
+
+                            if operator == '+':
+                                mass_per += value
+                            elif operator == '-':
+                                mass_per -= value
+                            else:
+                                raise ValueError("无效的操作符")
+
+                            index += 2
+
                         valid_ptms.append({
                             "mass": mass_per,
-                            "count_options": range(0, count + 1),  # 从0开始生成组合
+                            "count_options": range(0, count + 1),
                             "name": name.strip()
                         })
+
                     except Exception as e:
-                        st.error(f"The {i+1} Item Wrong: {str(e)}")
+                        st.error(f"第 {i+1} 项错误: {str(e)}")
                         return
             # 新增代码块结束
-
+            
             if not valid_ptms:
                 st.error("Please Input Valid PTMs Configuration!")
                 return

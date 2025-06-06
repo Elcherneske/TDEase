@@ -13,8 +13,8 @@
     "unimod_button_label": "PTMs Data Base : Unimod",
 
     "ms1_featuremap_header": "**MS1 Featuremap**",  
-    "featuremap_caption": "⭐ FeatureMap: Displays the time and mass distribution of features,Please select a range to generate integrated spectrum below",  
-    "integration_caption": "⭐ Integration: Select a range to define the base peak for PTMs annotation",
+    "featuremap_caption": "⭐ FeatureMap: Displays the time and mass distribution of features,Please select a range to generate integrated spectrum below(Double-click to reset the selection)",  
+    "integration_caption": "⭐ Integration: Select a range to define the base peak for PTMs annotation(Double-click to reset the selection and refresh the PTMs)",
     "ptms_caption": "⭐PTMs Matching: Displays the PTMs matching results",  
     "heatmap_xaxis_title": "Retention Time (min)",
     "heatmap_yaxis_title": "Mass (Da)",
@@ -143,5 +143,6 @@
 
     "isotope_offsets_label": "Select Allowed Isotope Shifts",
     "single_sample_ptms": "PTMs Match Table",
+
     "sample2_selector": "Select A Comparison Sample"
 }

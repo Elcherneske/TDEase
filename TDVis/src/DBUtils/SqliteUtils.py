@@ -71,7 +71,10 @@ class SqliteUtils:
         limit: int = None,
         offset: int = None
     ) -> pd.DataFrame:
-        """查询数据并返回DataFrame"""
+        """
+        查询数据并转换为DataFrame（兼容PostgreUtils接口）
+        """
+        conn, cursor = None, None  # 初始化连接变量
         try:
             conn, cursor = self._connect()
             columns_str = ", ".join(columns)
@@ -82,14 +85,14 @@ class SqliteUtils:
                 select_query += f" LIMIT {limit}"
             if offset:
                 select_query += f" OFFSET {offset}"
-                
+            # 显式传递连接并确保查询后关闭
             return pd.read_sql_query(select_query, conn, params=params)
         except Exception as e:
             raise Exception(f"查询数据失败: {str(e)}")
         finally:
-            if cursor:
+            if cursor:  # 直接关闭
                 cursor.close()
-            if conn:
+            if conn:  # 直接关闭
                 conn.close()
 
     # 修改：update_data 方法的 finally 块
@@ -138,23 +141,12 @@ class SqliteUtils:
 
     # 新增创建表方法（兼容PostgreUtils接口）
     def create_table(self, table_name: str, columns: List[str]) -> None:
-        """创建表时进行类型映射"""
-        # PostgreSQL到SQLite的类型映射
-        type_mapping = {
-            'SERIAL': 'INTEGER',
-            'VARCHAR': 'TEXT',
-            'JSONB': 'TEXT',
-            'TEXT': 'TEXT'
-        }
-        
-        # 转换列定义
-        mapped_columns = []
-        for col in columns:
-            for pg_type, sqlite_type in type_mapping.items():
-                col = col.replace(pg_type, sqlite_type)
-            mapped_columns.append(col)
-            
-        columns_str = ", ".join(mapped_columns)
+        """
+        创建数据库表（自动跳过已存在的表）
+        :param table_name: 表名
+        :param columns: 列定义列表（格式示例：["id INTEGER PRIMARY KEY", "name TEXT NOT NULL"]）
+        """
+        columns_str = ", ".join(columns)
         create_query = f"CREATE TABLE IF NOT EXISTS {table_name} ({columns_str})"
         self.execute_non_query(create_query)  # 复用非查询执行方法
     
@@ -172,59 +164,6 @@ class SqliteUtils:
         insert_query = f"INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})"
         return self.execute_non_query(insert_query, tuple(values))  # 传递参数元组
 
-    # 新增批量插入数据方法
-    def insert_batch_data(self, table_name: str, columns: List[str], values: List[Tuple[Any]]) -> None:
-        """批量插入数据"""
-        try:
-            conn, cursor = self._connect()
-            columns_str = ", ".join(columns)
-            placeholders = ", ".join(["?" * len(columns)])
-            insert_query = f"INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})"
-            cursor.executemany(insert_query, values)
-            conn.commit()
-        except Exception as e:
-            if conn:
-                conn.rollback()
-            raise Exception(f"批量插入数据失败: {str(e)}")
-        finally:
-            if cursor:
-                cursor.close()
-            if conn:
-                conn.close()
-
     # Add parameter placeholder method (PostgreSQL uses %s, SQLite uses ?)
     def param_placeholder(self) -> str:
-        """返回SQLite的参数占位符"""
         return "?"
-    
-    def json_array_append(self, column: str, path: str, value: str) -> str:
-        """SQLite的JSON数组追加实现"""
-        return f"json_insert({column}, '$[#]', {value})"
-
-    def json_extract(self, column: str, path: str) -> str:
-        """SQLite的JSON提取实现"""
-        return f"json_extract({column}, '{path}')"
-
-    def begin_transaction(self):
-        """开始事务"""
-        self.conn, self.cursor = self._connect()
-        self.conn.isolation_level = None  # 允许手动事务控制
-        self.cursor.execute('BEGIN')
-
-    def commit_transaction(self):
-        """提交事务"""
-        if self.conn:
-            self.cursor.execute('COMMIT')
-            self.cursor.close()
-            self.conn.close()
-            self.conn = None
-            self.cursor = None
-
-    def rollback_transaction(self):
-        """回滚事务"""
-        if self.conn:
-            self.cursor.execute('ROLLBACK')
-            self.cursor.close()
-            self.conn.close()
-            self.conn = None
-            self.cursor = None

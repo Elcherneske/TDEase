@@ -170,7 +170,7 @@ class ControlWidgets:
                             st.session_state["user_select_file2"] = selected_dir
                     if st.session_state.get('user_select_file2'):
                         st.session_state.sample2 = st.selectbox(
-                            "选择比对样本",
+                            self.locale.get("sample2_selector", "选择对比样本"),
                             options=FileUtils.list_samples(st.session_state['user_select_file2']),
                             index=0,
                             key='sample2_selector'
